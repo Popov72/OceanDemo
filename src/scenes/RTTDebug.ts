@@ -130,7 +130,10 @@ export class RTTDebug {
                 if (texture) {
                     const textureFormat = texture.getInternalTexture()?.format ?? BABYLON.Constants.TEXTUREFORMAT_RGBA;
                     texture.readPixels()!.then((buffer) => {
-                        this._exrSerializer.serialize(texture.getSize().width, texture.getSize().height, new Float32Array(buffer.buffer), textureFormat === BABYLON.Constants.TEXTUREFORMAT_RG ? ["R", "G"] : ["R", "G", "B", "A"]);
+                        const channels =
+                            textureFormat === BABYLON.Constants.TEXTUREFORMAT_R  ? ["R"] :
+                            textureFormat === BABYLON.Constants.TEXTUREFORMAT_RG ? ["R", "G"] : ["R", "G", "B", "A"];
+                        this._exrSerializer.serialize(texture.getSize().width, texture.getSize().height, new Float32Array(buffer.buffer), channels);
                         this._exrSerializer.download(this._debugPlaneList[i].name + ".exr");
                     });
                 }

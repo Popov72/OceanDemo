@@ -30,7 +30,7 @@ export class Ocean implements CreateSceneClass {
         this._engine = engine;
         this._scene = scene;
 
-        this._rttDebug = new RTTDebug(scene, engine, 10);
+        this._rttDebug = new RTTDebug(scene, engine, 12);
 
         this._camera = new BABYLON.ArcRotateCamera(
             "main",

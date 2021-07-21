@@ -2,8 +2,10 @@ import * as BABYLON from "@babylonjs/core";
 
 export class ComputeHelper {
 
-    private static _copyTextureCS: BABYLON.ComputeShader;
-    private static _copyTextureParams: BABYLON.UniformBuffer;
+    private static _copyTexture4CS: BABYLON.ComputeShader;
+    private static _copyTexture2CS: BABYLON.ComputeShader;
+    private static _copyTexture4Params: BABYLON.UniformBuffer;
+    private static _copyTexture2Params: BABYLON.UniformBuffer;
     private static _copyBufferTextureCS: BABYLON.ComputeShader;
     private static _copyBufferTextureParams: BABYLON.UniformBuffer;
     private static _copyTextureBufferCS: BABYLON.ComputeShader;
@@ -12,7 +14,7 @@ export class ComputeHelper {
     private static _clearTextureParams: BABYLON.UniformBuffer;
 
     private static _clearTextureComputeShader = `
-        [[group(0), binding(0)]] var tbuf : texture_storage_2d<rgba16float, write>;
+        [[group(0), binding(0)]] var tbuf : texture_storage_2d<rgba32float, write>;
 
         [[block]] struct Params {
             color : vec4<f32>;
@@ -30,9 +32,29 @@ export class ComputeHelper {
         }
     `;
 
-    private static _copyTextureComputeShader = `
-        [[group(0), binding(0)]] var dest : texture_storage_2d<rgba16float, write>;
-        [[group(0), binding(1)]] var src : texture_storage_2d<rgba16float, read>;
+    private static _copyTexture4ComputeShader = `
+        [[group(0), binding(0)]] var dest : texture_storage_2d<rgba32float, write>;
+        [[group(0), binding(1)]] var src : texture_storage_2d<rgba32float, read>;
+
+        [[block]] struct Params {
+            width : u32;
+            height : u32;
+        };
+        [[group(0), binding(2)]] var<uniform> params : Params;
+
+        [[stage(compute), workgroup_size(8, 8, 1)]]
+        fn main([[builtin(global_invocation_id)]] global_id : vec3<u32>) {
+            if (global_id.x >= params.width || global_id.y >= params.height) {
+                return;
+            }
+            let pix : vec4<f32> = textureLoad(src, vec2<i32>(global_id.xy));
+            textureStore(dest, vec2<i32>(global_id.xy), pix);
+        }
+    `;
+
+    private static _copyTexture2ComputeShader = `
+        [[group(0), binding(0)]] var dest : texture_storage_2d<rg32float, write>;
+        [[group(0), binding(1)]] var src : texture_storage_2d<rg32float, read>;
 
         [[block]] struct Params {
             width : u32;
@@ -55,7 +77,7 @@ export class ComputeHelper {
             elements : array<f32>;
         };
 
-        [[group(0), binding(0)]] var dest : texture_storage_2d<rgba16float, write>;
+        [[group(0), binding(0)]] var dest : texture_storage_2d<rgba32float, write>;
         [[group(0), binding(1)]] var<storage, read> src : FloatArray;
 
         [[block]] struct Params {
@@ -80,7 +102,7 @@ export class ComputeHelper {
             elements : array<f32>;
         };
 
-        [[group(0), binding(0)]] var src : texture_storage_2d<rgba16float, read>;
+        [[group(0), binding(0)]] var src : texture_storage_2d<rgba32float, read>;
         [[group(0), binding(1)]] var<storage, write> dest : FloatArray;
 
         [[block]] struct Params {
@@ -134,10 +156,11 @@ export class ComputeHelper {
         return texture;
     }
 
-    static CopyTexture(source: BABYLON.BaseTexture, dest: BABYLON.BaseTexture): void {
-        if (!ComputeHelper._copyTextureCS) {
-            const engine = source.getScene()!.getEngine();
-            const cs1 = new BABYLON.ComputeShader("copyTextureCompute", engine, { computeSource: ComputeHelper._copyTextureComputeShader }, { bindingsMapping:
+    static CopyTexture(source: BABYLON.BaseTexture, dest: BABYLON.BaseTexture, engine_?: BABYLON.Engine): void {
+        const numChannels = source.getInternalTexture()!.format === BABYLON.Constants.TEXTUREFORMAT_RG ? 2 : 4;
+        if (!ComputeHelper._copyTexture4CS && numChannels === 4 || !ComputeHelper._copyTexture2CS && numChannels === 2) {
+            const engine = source.getScene()?.getEngine() ?? engine_!;
+            const cs1 = new BABYLON.ComputeShader(`copyTexture${numChannels}Compute`, engine, { computeSource: numChannels === 4 ? ComputeHelper._copyTexture4ComputeShader : ComputeHelper._copyTexture2ComputeShader }, { bindingsMapping:
                 {
                     "dest": { group: 0, binding: 0 },
                     "src": { group: 0, binding: 1 },
@@ -152,20 +175,28 @@ export class ComputeHelper {
             
             cs1.setUniformBuffer("params", uBuffer0);
 
-            ComputeHelper._copyTextureCS = cs1;
-            ComputeHelper._copyTextureParams = uBuffer0;
+            if (numChannels === 4) {
+                ComputeHelper._copyTexture4CS = cs1;
+                ComputeHelper._copyTexture4Params = uBuffer0;
+            } else {
+                ComputeHelper._copyTexture2CS = cs1;
+                ComputeHelper._copyTexture2Params = uBuffer0;
+            }
         }
 
-        ComputeHelper._copyTextureCS.setStorageTexture("src", source);
-        ComputeHelper._copyTextureCS.setStorageTexture("dest", dest);
+        const cs = numChannels === 4 ? ComputeHelper._copyTexture4CS : ComputeHelper._copyTexture2CS;
+        const params = numChannels === 4 ? ComputeHelper._copyTexture4Params : ComputeHelper._copyTexture2Params;
+
+        cs.setStorageTexture("src", source);
+        cs.setStorageTexture("dest", dest);
 
         const { width, height } = source.getSize();
 
-        ComputeHelper._copyTextureParams.updateInt("width", width);
-        ComputeHelper._copyTextureParams.updateInt("height", height);
-        ComputeHelper._copyTextureParams.update();
+        params.updateInt("width", width);
+        params.updateInt("height", height);
+        params.update();
 
-        ComputeHelper.Dispatch(ComputeHelper._copyTextureCS, width, height, 1);
+        ComputeHelper.Dispatch(cs, width, height, 1);
     }
 
     static CopyBufferToTexture(source: BABYLON.StorageBuffer, dest: BABYLON.BaseTexture): void {

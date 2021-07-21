@@ -50,7 +50,7 @@ export class WavesGenerator {
     public update(): void {
         const time = (new Date().getTime() / 1000) - this._startTime;
         for (let i = 0; i < this._cascades.length; ++i) {
-            this._cascades[i].calculateWavesAtTime(0);
+            this._cascades[i].calculateWavesAtTime(time);
         }
     }
 
