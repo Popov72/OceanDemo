@@ -1,6 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
 import { CustomMaterial } from "@babylonjs/materials";
+import { EXRSerializer } from "./exrSerializer";
 
 const numTotalPlanes = 20;
 const planeSpacing = 0.01;
@@ -13,6 +14,8 @@ export class RTTDebug {
     private _gui: GUI.AdvancedDynamicTexture;
     private _guiBackgrounds: GUI.Rectangle[];
     private _guiTexts: GUI.TextBlock[];
+    private _guiButtons: GUI.Button[];
+    private _exrSerializer: EXRSerializer;
 
     public get camera(): BABYLON.TargetCamera {
         return this._camera;
@@ -36,6 +39,8 @@ export class RTTDebug {
         this._debugPlaneList = [];
         this._guiBackgrounds = [];
         this._guiTexts = [];
+        this._guiButtons = [];
+        this._exrSerializer = new EXRSerializer();
 
         this._camera = new BABYLON.ArcRotateCamera(
             "debug",
@@ -92,7 +97,7 @@ export class RTTDebug {
 
             grid.addColumnDefinition(1 / numTotalPlanes);
 
-            const bkg = new GUI.Rectangle("text");
+            const bkg = new GUI.Rectangle("text" + i);
 
             bkg.background = "green";
             bkg.color = "white";
@@ -103,7 +108,7 @@ export class RTTDebug {
 
             this._guiBackgrounds.push(bkg);
 
-            const text = new GUI.TextBlock("title", "");
+            const text = new GUI.TextBlock("title" + i, "");
 
             text.color = "white";
             text.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
@@ -113,8 +118,29 @@ export class RTTDebug {
 
             this._guiTexts.push(text);
 
+            const button = GUI.Button.CreateSimpleButton("button" + i, "Save");
+            button.width = 0.7;
+            button.color = "white";
+            button.cornerRadius = 10;
+            button.background = "green";
+            button.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            button.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            button.onPointerUpObservable.add(() => {
+                const texture = (this._debugPlaneList[i].material as BABYLON.StandardMaterial).emissiveTexture;
+                if (texture) {
+                    const textureFormat = texture.getInternalTexture()?.format ?? BABYLON.Constants.TEXTUREFORMAT_RGBA;
+                    texture.readPixels()!.then((buffer) => {
+                        this._exrSerializer.serialize(texture.getSize().width, texture.getSize().height, new Float32Array(buffer.buffer), textureFormat === BABYLON.Constants.TEXTUREFORMAT_RG ? ["R", "G"] : ["R", "G", "B", "A"]);
+                        this._exrSerializer.download(this._debugPlaneList[i].name + ".exr");
+                    });
+                }
+            });
+
+            this._guiButtons.push(button);
+
             grid.addControl(bkg, 0, i);
             grid.addControl(text, 0, i);
+            grid.addControl(button, 0, i)
         }
 
         for (let i = numPlanes; i < numTotalPlanes; ++i) {
@@ -170,6 +196,9 @@ export class RTTDebug {
             this._guiBackgrounds[i].height = (20 * screenWidth / 1920) + "px";
             this._guiTexts[i].height = (20 * screenWidth / 1920) + "px";
             this._guiTexts[i].fontSize = (8 * screenWidth / 1920) + "px";
+            this._guiButtons[i].top = ((20 * screenWidth / 1920) + 2) + "px";
+            this._guiButtons[i].height = (16 * screenWidth / 1920) + "px";
+            this._guiButtons[i].fontSize = (8 * screenWidth / 1920) + "px";
         }
     }
 }

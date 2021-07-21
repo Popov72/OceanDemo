@@ -3,8 +3,7 @@ let PI: f32 = 3.1415926;
 [[group(0), binding(0)]] var PrecomputeBuffer : texture_storage_2d<rgba32float, write>;
 
 [[block]] struct Params {
-    PingPong: u32;
-    Step : u32;
+    Step : i32;
     Size : i32;
 };
 

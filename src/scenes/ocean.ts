@@ -3,6 +3,8 @@ import { CreateSceneClass } from "../createScene";
 import { RTTDebug } from "./RTTDebug";
 import { WavesGenerator } from "./wavesGenerator";
 
+import noiseEXR from "../../assets/ocean/00_noise0.exr";
+
 export class Ocean implements CreateSceneClass {
 
     private _engine: BABYLON.Engine;
@@ -54,9 +56,11 @@ export class Ocean implements CreateSceneClass {
             scene
         );
 
+        const noise = await (await fetch(noiseEXR)).arrayBuffer();
+
         const size = 256;
 
-        const wavesGenerator = new WavesGenerator(size, scene, this._rttDebug);
+        const wavesGenerator = new WavesGenerator(size, scene, this._rttDebug, noise);
 
         scene.onBeforeRenderObservable.add(() => {
             wavesGenerator.update();

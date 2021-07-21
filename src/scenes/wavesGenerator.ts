@@ -16,14 +16,14 @@ export class WavesGenerator {
     private _noise: BABYLON.Texture;
     private _cascades: WavesCascade[];
 
-    constructor(size: number, scene: BABYLON.Scene, rttDebug: RTTDebug) {
+    constructor(size: number, scene: BABYLON.Scene, rttDebug: RTTDebug, noise: BABYLON.Nullable<ArrayBuffer>) {
         this._engine = scene.getEngine();
         this._size = size;
         this._rttDebug = rttDebug;
         this._startTime = new Date().getTime() / 1000;
 
         this._fft = new FFT(scene.getEngine(), scene, this._rttDebug, 1, size);
-        this._noise = this._generateNoiseTexture(size);
+        this._noise = this._generateNoiseTexture(size, noise);
 
         this._rttDebug.setTexture(0, "noise", this._noise);
 
@@ -32,7 +32,7 @@ export class WavesGenerator {
         this.wavesSettings = new WavesSettings();
 
         this._cascades = [
-            new WavesCascade(size, this._noise, this._rttDebug, 2, this._engine),
+            new WavesCascade(size, this._noise, this._fft, this._rttDebug, 2, this._engine),
         ];
 
         this.initializeCascades();
@@ -50,7 +50,7 @@ export class WavesGenerator {
     public update(): void {
         const time = (new Date().getTime() / 1000) - this._startTime;
         for (let i = 0; i < this._cascades.length; ++i) {
-            this._cascades[i].calculateWavesAtTime(time);
+            this._cascades[i].calculateWavesAtTime(0);
         }
     }
 
@@ -66,16 +66,50 @@ export class WavesGenerator {
         return Math.cos(2 * Math.PI * Math.random()) * Math.sqrt(-2 * Math.log(Math.random()));
     }
 
-    private _generateNoiseTexture(size: number): BABYLON.Texture {
-        const data = new Float32Array(size * size * 4);
-        for (let i = 0; i < size; ++i) {
-            for (let j = 0; j < size; ++j) {
-                data[j * size * 2 + i * 2 + 0] = this._normalRandom();
-                data[j * size * 2 + i * 2 + 1] = this._normalRandom();
+    private _generateNoiseTexture(size: number, noiseBuffer: BABYLON.Nullable<ArrayBuffer>): BABYLON.Texture {
+        const numChannels = noiseBuffer ? 4 : 2;
+        const data = new Float32Array(size * size * numChannels);
+
+        if (noiseBuffer) {
+            const buf = new Uint8Array(noiseBuffer);
+            const tmpUint8 = new Uint8Array(4);
+            const tmpFloat = new Float32Array(tmpUint8.buffer, 0, 1);
+
+            let offset = 0x094b;
+            let dataOffset = 0;
+            for (let j = 0; j < 256; ++j) {
+                offset += 8;
+                offset += 256 * 4; // A channel
+                offset += 256 * 4; // B channel
+                for (let i = 0; i < 256; ++i) { // G channel
+                    tmpUint8[0] = buf[offset++];
+                    tmpUint8[1] = buf[offset++];
+                    tmpUint8[2] = buf[offset++];
+                    tmpUint8[3] = buf[offset++];
+                    data[dataOffset + 1 + i * 4] = tmpFloat[0];
+                }
+                for (let i = 0; i < 256; ++i) { // R channel
+                    tmpUint8[0] = buf[offset++];
+                    tmpUint8[1] = buf[offset++];
+                    tmpUint8[2] = buf[offset++];
+                    tmpUint8[3] = buf[offset++];
+                    data[dataOffset + 0 + i * 4] = tmpFloat[0];
+                }
+                for (let i = 0; i < 256; ++i) { // A channel
+                    data[dataOffset + 3 + i * 4] = 1;
+                }
+                dataOffset += 256 * 4;
+            }
+        } else {
+            for (let i = 0; i < size; ++i) {
+                for (let j = 0; j < size; ++j) {
+                    data[j * size * 2 + i * 2 + 0] = this._normalRandom();
+                    data[j * size * 2 + i * 2 + 1] = this._normalRandom();
+                }
             }
         }
 
-        const noise = new BABYLON.RawTexture(data, size, size, BABYLON.Constants.TEXTUREFORMAT_RG, this._engine, false, false, BABYLON.Constants.TEXTURE_NEAREST_SAMPLINGMODE, BABYLON.Constants.TEXTURETYPE_FLOAT);
+        const noise = new BABYLON.RawTexture(data, size, size, numChannels === 2 ? BABYLON.Constants.TEXTUREFORMAT_RG : BABYLON.Constants.TEXTUREFORMAT_RGBA, this._engine, false, false, BABYLON.Constants.TEXTURE_NEAREST_SAMPLINGMODE, BABYLON.Constants.TEXTURETYPE_FLOAT);
         noise.name = "noise";
 
         return noise;
