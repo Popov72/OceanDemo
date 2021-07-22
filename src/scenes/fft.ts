@@ -62,6 +62,10 @@ export class FFT {
         const logSize = Math.log2(this._size) | 0;
 
         // TODO: optimize recreation of binding groups by not ping/ponging the textures
+        /*this._horizontalStepIFFT[0].setTexture("InputBuffer", input, false);
+        this._horizontalStepIFFT[0].setStorageTexture("OutputBuffer", buffer);
+        this._horizontalStepIFFT[1].setTexture("InputBuffer", buffer, false);
+        this._horizontalStepIFFT[1].setStorageTexture("OutputBuffer", input);*/
 
         let pingPong = false;
         for (let i = 0; i < logSize; ++i) {
@@ -70,11 +74,18 @@ export class FFT {
             this._params.updateInt("Step", i);
             this._params.update();
 
-            this._horizontalStepIFFT[i].setTexture("InputBuffer", pingPong ? input : buffer, false);
-            this._horizontalStepIFFT[i].setStorageTexture("OutputBuffer", pingPong ? buffer : input);
-            
-            ComputeHelper.Dispatch(this._horizontalStepIFFT[i], this._size, this._size, 1);
+            this._horizontalStepIFFT[0].setTexture("InputBuffer", pingPong ? input : buffer, false);
+            this._horizontalStepIFFT[0].setStorageTexture("OutputBuffer", pingPong ? buffer : input);
+
+            ComputeHelper.Dispatch(this._horizontalStepIFFT[0], this._size, this._size, 1);
+
+            //ComputeHelper.Dispatch(pingPong ? this._horizontalStepIFFT[0] : this._horizontalStepIFFT[1], this._size, this._size, 1);
         }
+
+        /*this._verticalStepIFFT[0].setTexture("InputBuffer", pingPong ? buffer : input, false);
+        this._verticalStepIFFT[0].setStorageTexture("OutputBuffer", pingPong ? input : buffer);
+        this._verticalStepIFFT[1].setTexture("InputBuffer", pingPong ? input : buffer, false);
+        this._verticalStepIFFT[1].setStorageTexture("OutputBuffer", pingPong ? buffer : input);*/
 
         for (let i = 0; i < logSize; ++i) {
             pingPong = !pingPong;
@@ -82,10 +93,12 @@ export class FFT {
             this._params.updateInt("Step", i);
             this._params.update();
 
-            this._verticalStepIFFT[i].setTexture("InputBuffer", pingPong ? input : buffer, false);
-            this._verticalStepIFFT[i].setStorageTexture("OutputBuffer", pingPong ? buffer : input);
-            
-            ComputeHelper.Dispatch(this._verticalStepIFFT[i], this._size, this._size, 1);
+            this._verticalStepIFFT[0].setTexture("InputBuffer", pingPong ? input : buffer, false);
+            this._verticalStepIFFT[0].setStorageTexture("OutputBuffer", pingPong ? buffer : input);
+
+            ComputeHelper.Dispatch(this._verticalStepIFFT[0], this._size, this._size, 1);
+
+            //ComputeHelper.Dispatch(pingPong ? this._verticalStepIFFT[0] : this._verticalStepIFFT[1], this._size, this._size, 1);
         }
 
         if (pingPong) {
@@ -106,9 +119,7 @@ export class FFT {
     }
 
     private _createComputeShaders(): void {
-        const logSize = Math.log2(this._size) | 0;
-
-        for (let i = 0; i < logSize; ++i) {
+        for (let i = 0; i < 2; ++i) {
             this._horizontalStepIFFT[i] = new BABYLON.ComputeShader("horizontalStepIFFT", this._engine, { computeSource: fftInverseFFTCS }, {
                 bindingsMapping: {
                     "params": { group: 0, binding: 1 },
