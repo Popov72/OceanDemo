@@ -1,6 +1,4 @@
-[[group(0), binding(0)]] var H0Sampler : sampler;
 [[group(0), binding(1)]] var H0 : texture_2d<f32>;
-[[group(0), binding(2)]] var WavesDataSampler : sampler;
 [[group(0), binding(3)]] var WavesData : texture_2d<f32>;
 
 [[block]] struct Params {
@@ -22,9 +20,6 @@ fn complexMult(a: vec2<f32>, b: vec2<f32>) -> vec2<f32>
 [[stage(compute), workgroup_size(8,8,1)]]
 fn calculateAmplitudes([[builtin(global_invocation_id)]] id : vec3<u32>)
 {
-    ignore(H0Sampler);
-    ignore(WavesDataSampler);
-
     let iid = vec3<i32>(id);
 	let wave = textureLoad(WavesData, iid.xy, 0);
 	let phase = wave.w * params.Time;

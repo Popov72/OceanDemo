@@ -62,8 +62,8 @@ export class WavesCascade {
 
         this._timeDependentSpectrumParams.addUniform("Time", 1);
 
-        this._timeDependentSpectrum.setTexture("H0", this._initialSpectrum.initialSpectrum);
-        this._timeDependentSpectrum.setTexture("WavesData", this._initialSpectrum.wavesData);
+        this._timeDependentSpectrum.setTexture("H0", this._initialSpectrum.initialSpectrum, false);
+        this._timeDependentSpectrum.setTexture("WavesData", this._initialSpectrum.wavesData, false);
         this._timeDependentSpectrum.setUniformBuffer("params", this._timeDependentSpectrumParams);
         this._timeDependentSpectrum.setStorageTexture("DxDz", this._DxDz);
         this._timeDependentSpectrum.setStorageTexture("DyDxz", this._DyDxz);
@@ -103,10 +103,10 @@ export class WavesCascade {
         this._texturesMerger.setStorageTexture("Displacement", this._displacement);
         this._texturesMerger.setStorageTexture("Derivatives", this._derivatives);
         this._texturesMerger.setStorageTexture("Turbulence", this._turbulence);
-        this._texturesMerger.setTexture("DxDz", this._DxDz);
-        this._texturesMerger.setTexture("DyDxz", this._DyDxz);
-        this._texturesMerger.setTexture("DyxDyz", this._DyxDyz);
-        this._texturesMerger.setTexture("DxxDzz", this._DxxDzz);
+        this._texturesMerger.setTexture("DxDz", this._DxDz, false);
+        this._texturesMerger.setTexture("DyDxz", this._DyDxz, false);
+        this._texturesMerger.setTexture("DyxDyz", this._DyxDyz, false);
+        this._texturesMerger.setTexture("DxxDzz", this._DxxDzz, false);
 
         rttDebug.setTexture(debugFirstIndex + 7, "displacement", this._displacement, 2);
         rttDebug.setTexture(debugFirstIndex + 8, "derivatives", this._derivatives, 2);

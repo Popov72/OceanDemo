@@ -2,7 +2,6 @@ let PI : f32 = 3.1415926;
 
 [[group(0), binding(1)]] var WavesData : texture_storage_2d<rgba32float, write>;
 [[group(0), binding(2)]] var H0K : texture_storage_2d<rg32float, write>;
-[[group(0), binding(3)]] var NoiseSampler : sampler;
 [[group(0), binding(4)]] var Noise : texture_2d<f32>;
 
 [[block]] struct Params {
@@ -114,7 +113,6 @@ fn shortWavesFade(kLength: f32, pars: SpectrumParameter) -> f32
 [[stage(compute), workgroup_size(8,8,1)]]
 fn calculateInitialSpectrum([[builtin(global_invocation_id)]] id : vec3<u32>)
 {
-    ignore(NoiseSampler);
 	let deltaK = 2.0 * PI / params.LengthScale;
 	let nx = f32(id.x) - f32(params.Size) / 2.0;
 	let nz = f32(id.y) - f32(params.Size) / 2.0;

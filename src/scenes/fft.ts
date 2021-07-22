@@ -61,6 +61,8 @@ export class FFT {
     public IFFT2D(input: BABYLON.BaseTexture, buffer: BABYLON.BaseTexture): void {
         const logSize = Math.log2(this._size) | 0;
 
+        // TODO: optimize recreation of binding groups by not ping/ponging the textures
+
         let pingPong = false;
         for (let i = 0; i < logSize; ++i) {
             pingPong = !pingPong;
@@ -68,7 +70,7 @@ export class FFT {
             this._params.updateInt("Step", i);
             this._params.update();
 
-            this._horizontalStepIFFT[i].setTexture("InputBuffer", pingPong ? input : buffer);
+            this._horizontalStepIFFT[i].setTexture("InputBuffer", pingPong ? input : buffer, false);
             this._horizontalStepIFFT[i].setStorageTexture("OutputBuffer", pingPong ? buffer : input);
             
             ComputeHelper.Dispatch(this._horizontalStepIFFT[i], this._size, this._size, 1);
@@ -80,7 +82,7 @@ export class FFT {
             this._params.updateInt("Step", i);
             this._params.update();
 
-            this._verticalStepIFFT[i].setTexture("InputBuffer", pingPong ? input : buffer);
+            this._verticalStepIFFT[i].setTexture("InputBuffer", pingPong ? input : buffer, false);
             this._verticalStepIFFT[i].setStorageTexture("OutputBuffer", pingPong ? buffer : input);
             
             ComputeHelper.Dispatch(this._verticalStepIFFT[i], this._size, this._size, 1);
@@ -90,7 +92,7 @@ export class FFT {
             ComputeHelper.CopyTexture(buffer, input, this._engine);
         }
 
-        this._permute.setTexture("InputBuffer", input);
+        this._permute.setTexture("InputBuffer", input, false);
         this._permute.setStorageTexture("OutputBuffer", buffer);
 
         ComputeHelper.Dispatch(this._permute, this._size, this._size, 1);
@@ -118,7 +120,7 @@ export class FFT {
             });
 
             this._horizontalStepIFFT[i].setUniformBuffer("params", this._params);
-            this._horizontalStepIFFT[i].setTexture("PrecomputedData", this._precomputedData);
+            this._horizontalStepIFFT[i].setTexture("PrecomputedData", this._precomputedData, false);
 
             this._verticalStepIFFT[i] = new BABYLON.ComputeShader("verticalStepIFFT", this._engine, { computeSource: fftInverseFFT2CS }, {
                 bindingsMapping: {
@@ -131,7 +133,7 @@ export class FFT {
             });
 
             this._verticalStepIFFT[i].setUniformBuffer("params", this._params);
-            this._verticalStepIFFT[i].setTexture("PrecomputedData", this._precomputedData);
+            this._verticalStepIFFT[i].setTexture("PrecomputedData", this._precomputedData, false);
         }
 
         this._permute = new BABYLON.ComputeShader("permute", this._engine, { computeSource: fftInverseFFT3CS }, {

@@ -64,7 +64,7 @@ export class InitialSpectrum {
 
         this._phase1.setStorageTexture("WavesData", this._precomputedData);
         this._phase1.setStorageTexture("H0K", this._buffer);
-        this._phase1.setTexture("Noise", noise);
+        this._phase1.setTexture("Noise", noise, false);
         this._phase1.setStorageBuffer("spectrumParameters", this._spectrumParameters);
         this._phase1.setUniformBuffer("params", this._params);
 
@@ -79,7 +79,7 @@ export class InitialSpectrum {
 
         this._phase2.setStorageTexture("H0", this._initialSpectrum);
         this._phase2.setUniformBuffer("params", this._params);
-        this._phase2.setTexture("H0K", this._buffer);
+        this._phase2.setTexture("H0K", this._buffer, false);
 
         this._rttDebug.setTexture(this._debugFirstIndex + 0, "waves precompute", this._precomputedData);
         this._rttDebug.setTexture(this._debugFirstIndex + 1, "H0K", this._buffer, 1000);
