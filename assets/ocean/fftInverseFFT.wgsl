@@ -29,18 +29,3 @@ fn horizontalStepInverseFFT([[builtin(global_invocation_id)]] id : vec3<u32>)
         input0.xy + complexMult(vec2<f32>(data.r, -data.g), input1.xy), 0., 0.
     ));
 }
-
-[[stage(compute), workgroup_size(8,8,1)]]
-fn verticalStepInverseFFT([[builtin(global_invocation_id)]] id : vec3<u32>)
-{
-    let iid = vec3<i32>(id);
-    let data = textureLoad(PrecomputedData, vec2<i32>(params.Step, iid.y), 0);
-	let inputsIndices = vec2<i32>(data.ba);
-
-    let input0 = textureLoad(InputBuffer, vec2<i32>(iid.x, inputsIndices.x), 0);
-    let input1 = textureLoad(InputBuffer, vec2<i32>(iid.x, inputsIndices.y), 0);
-
-    textureStore(OutputBuffer, iid.xy, vec4<f32>(
-        input0.xy + complexMult(vec2<f32>(data.r, -data.g), input1.xy), 0., 0.
-    ));
-}
