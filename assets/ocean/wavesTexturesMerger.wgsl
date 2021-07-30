@@ -8,7 +8,7 @@
 [[group(0), binding(1)]] var Displacement : texture_storage_2d<rgba16float, write>;
 [[group(0), binding(2)]] var Derivatives : texture_storage_2d<rgba16float, write>;
 [[group(0), binding(3)]] var TurbulenceRead : texture_2d<f32>;
-[[group(0), binding(4)]] var TurbulenceWrite : texture_storage_2d<rgba32float, write>;
+[[group(0), binding(4)]] var TurbulenceWrite : texture_storage_2d<rgba16float, write>;
 
 [[group(0), binding(5)]] var Dx_Dz : texture_2d<f32>;
 [[group(0), binding(6)]] var Dy_Dxz : texture_2d<f32>;
