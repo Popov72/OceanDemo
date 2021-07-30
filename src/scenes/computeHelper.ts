@@ -34,7 +34,7 @@ export class ComputeHelper {
 
     private static _copyTexture4ComputeShader = `
         [[group(0), binding(0)]] var dest : texture_storage_2d<rgba32float, write>;
-        [[group(0), binding(1)]] var src : texture_storage_2d<rgba32float, read>;
+        [[group(0), binding(1)]] var src : texture_2d<f32>;
 
         [[block]] struct Params {
             width : u32;
@@ -47,14 +47,14 @@ export class ComputeHelper {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
             }
-            let pix : vec4<f32> = textureLoad(src, vec2<i32>(global_id.xy));
+            let pix : vec4<f32> = textureLoad(src, vec2<i32>(global_id.xy), 0);
             textureStore(dest, vec2<i32>(global_id.xy), pix);
         }
     `;
 
     private static _copyTexture2ComputeShader = `
         [[group(0), binding(0)]] var dest : texture_storage_2d<rg32float, write>;
-        [[group(0), binding(1)]] var src : texture_storage_2d<rg32float, read>;
+        [[group(0), binding(1)]] var src : texture_2d<f32>;
 
         [[block]] struct Params {
             width : u32;
@@ -67,7 +67,7 @@ export class ComputeHelper {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
             }
-            let pix : vec4<f32> = textureLoad(src, vec2<i32>(global_id.xy));
+            let pix : vec4<f32> = textureLoad(src, vec2<i32>(global_id.xy), 0);
             textureStore(dest, vec2<i32>(global_id.xy), pix);
         }
     `;
@@ -102,7 +102,7 @@ export class ComputeHelper {
             elements : array<f32>;
         };
 
-        [[group(0), binding(0)]] var src : texture_storage_2d<rgba32float, read>;
+        [[group(0), binding(0)]] var src : texture_2d<f32>;
         [[group(0), binding(1)]] var<storage, write> dest : FloatArray;
 
         [[block]] struct Params {
@@ -117,7 +117,7 @@ export class ComputeHelper {
                 return;
             }
             let offset : u32 = global_id.y * params.width * 4u + global_id.x * 4u;
-            let pix : vec4<f32> = textureLoad(src, vec2<i32>(global_id.xy));
+            let pix : vec4<f32> = textureLoad(src, vec2<i32>(global_id.xy), 0);
             dest.elements[offset] = pix.r;
             dest.elements[offset + 1u] = pix.g;
             dest.elements[offset + 2u] = pix.b;
@@ -187,7 +187,7 @@ export class ComputeHelper {
         const cs = numChannels === 4 ? ComputeHelper._copyTexture4CS : ComputeHelper._copyTexture2CS;
         const params = numChannels === 4 ? ComputeHelper._copyTexture4Params : ComputeHelper._copyTexture2Params;
 
-        cs.setStorageTexture("src", source);
+        cs.setTexture("src", source, false);
         cs.setStorageTexture("dest", dest);
 
         const { width, height } = source.getSize();
@@ -255,7 +255,7 @@ export class ComputeHelper {
             ComputeHelper._copyTextureBufferParams = uBuffer0;
         }
 
-        ComputeHelper._copyTextureBufferCS.setStorageTexture("src", source);
+        ComputeHelper._copyTextureBufferCS.setTexture("src", source, false);
         ComputeHelper._copyTextureBufferCS.setStorageBuffer("dest", dest);
 
         const { width, height } = source.getSize();
