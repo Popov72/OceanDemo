@@ -32,6 +32,18 @@ export class WavesCascade {
     private _turbulence2: BABYLON.BaseTexture;
     private _pingPongTurbulence: boolean;
 
+    public get displacement() {
+        return this._displacement;
+    }
+
+    public get derivatives() {
+        return this._derivatives;
+    }
+
+    public get turbulence() {
+        return this._pingPongTurbulence ? this._turbulence2 : this._turbulence;
+    }
+
     constructor(size: number, gaussianNoise: BABYLON.BaseTexture, fft: FFT, rttDebug: RTTDebug, debugFirstIndex: number, engine: BABYLON.Engine) {
         this._engine = engine;
         this._size = size;
@@ -94,8 +106,8 @@ export class WavesCascade {
             entryPoint: "fillResultTextures"
         });
 
-        this._displacement = ComputeHelper.CreateStorageTexture("displacement", this._engine, this._size, this._size, BABYLON.Constants.TEXTUREFORMAT_RGBA);
-        this._derivatives = ComputeHelper.CreateStorageTexture("derivatives", this._engine, this._size, this._size, BABYLON.Constants.TEXTUREFORMAT_RGBA);//, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT, BABYLON.Constants.TEXTURE_TRILINEAR_SAMPLINGMODE, true);
+        this._displacement = ComputeHelper.CreateStorageTexture("displacement", this._engine, this._size, this._size, BABYLON.Constants.TEXTUREFORMAT_RGBA, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT, BABYLON.Constants.TEXTURE_BILINEAR_SAMPLINGMODE);
+        this._derivatives = ComputeHelper.CreateStorageTexture("derivatives", this._engine, this._size, this._size, BABYLON.Constants.TEXTUREFORMAT_RGBA, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT, BABYLON.Constants.TEXTURE_TRILINEAR_SAMPLINGMODE, false);
         this._turbulence = ComputeHelper.CreateStorageTexture("turbulence", this._engine, this._size, this._size, BABYLON.Constants.TEXTUREFORMAT_RGBA);//, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT, BABYLON.Constants.TEXTURE_TRILINEAR_SAMPLINGMODE, true);
         this._turbulence2 = ComputeHelper.CreateStorageTexture("turbulence", this._engine, this._size, this._size, BABYLON.Constants.TEXTUREFORMAT_RGBA);//, BABYLON.Constants.TEXTURETYPE_HALF_FLOAT, BABYLON.Constants.TEXTURE_TRILINEAR_SAMPLINGMODE, true);
 
@@ -146,6 +158,8 @@ export class WavesCascade {
         this._texturesMerger.setStorageTexture("TurbulenceWrite", this._pingPongTurbulence ?  this._turbulence2 : this._turbulence);
 
         ComputeHelper.Dispatch(this._texturesMerger, this._size, this._size, 1);
+
+        //(this._engine as any)._generateMipmaps(this._derivatives, (this._engine as any)._renderTargetEncoder);
     }
 
     public dispose(): void {

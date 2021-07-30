@@ -16,6 +16,10 @@ export class WavesGenerator {
     private _noise: BABYLON.Texture;
     private _cascades: WavesCascade[];
 
+    public getCascade(num: number) {
+        return this._cascades[num];
+    }
+
     constructor(size: number, scene: BABYLON.Scene, rttDebug: RTTDebug, noise: BABYLON.Nullable<ArrayBuffer>) {
         this._engine = scene.getEngine();
         this._size = size;

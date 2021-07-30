@@ -37,7 +37,7 @@ module.exports = {
                 loader: "ts-loader",
             },
             {
-                test: /\.(png|jpg|gif|env|glb|stl|exr)$/i,
+                test: /\.(png|jpg|gif|env|glb|stl|exr|hdr)$/i,
                 use: [
                     {
                         loader: "url-loader",
@@ -48,7 +48,7 @@ module.exports = {
                 ],
             },
             {
-                test: /\.(wgsl)$/i,
+                test: /\.(wgsl|glsl)$/i,
                 use: [
                     {
                         loader: "raw-loader",
