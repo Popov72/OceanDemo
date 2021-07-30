@@ -3,8 +3,8 @@ import * as GUI from "@babylonjs/gui";
 import { CustomMaterial } from "@babylonjs/materials";
 import { EXRSerializer } from "./exrSerializer";
 
-const numTotalPlanes = 20;
-const planeSpacing = 0.01;
+const numTotalPlanes = 32;
+const planeSpacing = 0.003;
 
 export class RTTDebug {
     private _engine: BABYLON.Engine;

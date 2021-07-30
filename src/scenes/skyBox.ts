@@ -50,7 +50,7 @@ export class SkyBox {
         this._skybox.material = this._skyMaterial;
 
         this._skyMaterial.azimuth = 0.307;
-        this._skyMaterial.inclination = 0.3;
+        this._skyMaterial.inclination = 0.0;
     
         (window as any).ss = this._skyMaterial;
 

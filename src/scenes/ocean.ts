@@ -36,7 +36,7 @@ export class Ocean implements CreateSceneClass {
         this._engine = engine;
         this._scene = scene;
 
-        this._rttDebug = new RTTDebug(scene, engine, 12);
+        this._rttDebug = new RTTDebug(scene, engine, 32);
 
         const skybox = new SkyBox(true, scene);
 
@@ -116,16 +116,22 @@ export class Ocean implements CreateSceneClass {
                 mat.metallic = 0;
                 mat.roughness = 0.311;
                 mat.forceIrradianceInFragment = true;
+                //mat.wireframe = true;
 
                 mat.AddUniform("_WorldSpaceCameraPos", "vec3", "");
                 mat.AddUniform("_LOD_scale", "float", 7.13);
                 mat.AddUniform("LengthScale0", "float", wavesGenerator.lengthScale[0]);
-                mat.AddUniform("LengthScale1", "float", 17/*wavesGenerator.lengthScale[1]*/);
-                mat.AddUniform("LengthScale2", "float", 5/*wavesGenerator.lengthScale[2]*/);
+                mat.AddUniform("LengthScale1", "float", wavesGenerator.lengthScale[1]);
+                mat.AddUniform("LengthScale2", "float", wavesGenerator.lengthScale[2]);
                 mat.AddUniform("_Displacement_c0", "sampler2D", wavesGenerator.getCascade(0).displacement);
                 mat.AddUniform("_Derivatives_c0", "sampler2D", wavesGenerator.getCascade(0).derivatives);
                 mat.AddUniform("_Turbulence_c0", "sampler2D", wavesGenerator.getCascade(0).turbulence);
-                //mat.AddUniform("_FoamColor", "vec3", new BABYLON.Color3(1, 1, 1).toLinearSpace());
+                mat.AddUniform("_Displacement_c1", "sampler2D", wavesGenerator.getCascade(1).displacement);
+                mat.AddUniform("_Derivatives_c1", "sampler2D", wavesGenerator.getCascade(1).derivatives);
+                mat.AddUniform("_Turbulence_c1", "sampler2D", wavesGenerator.getCascade(1).turbulence);
+                mat.AddUniform("_Displacement_c2", "sampler2D", wavesGenerator.getCascade(2).displacement);
+                mat.AddUniform("_Derivatives_c2", "sampler2D", wavesGenerator.getCascade(2).derivatives);
+                mat.AddUniform("_Turbulence_c2", "sampler2D", wavesGenerator.getCascade(2).turbulence);
                 mat.AddUniform("_FoamColor", "vec3", new BABYLON.Vector3(1, 1, 1));
                 mat.AddUniform("_SSSStrength", "float", 0.133);
                 const _Color = new BABYLON.Color3(0.03457636, 0.12297464, 0.1981132);//.toLinearSpace();
@@ -146,6 +152,8 @@ export class Ocean implements CreateSceneClass {
                 mat.Vertex_Definitions(`
                     varying vec2 vWorldUV;
                     varying vec2 vUVCoords_c0;
+                    varying vec2 vUVCoords_c1;
+                    varying vec2 vUVCoords_c2;
                     varying vec3 vViewVector;
                     varying vec4 vLodScales;
                 `);
@@ -153,6 +161,8 @@ export class Ocean implements CreateSceneClass {
                 mat.Fragment_Definitions(`
                     varying vec2 vWorldUV;
                     varying vec2 vUVCoords_c0;
+                    varying vec2 vUVCoords_c1;
+                    varying vec2 vUVCoords_c2;
                     varying vec3 vViewVector;
                     varying vec4 vLodScales;
                 `);
@@ -171,10 +181,15 @@ export class Ocean implements CreateSceneClass {
                     float largeWavesBias = 0.;
                 
                     vUVCoords_c0 = vWorldUV / LengthScale0;
+                    vUVCoords_c1 = vWorldUV / LengthScale1;
+                    vUVCoords_c2 = vWorldUV / LengthScale2;
                 
                     displacement += texture2D(_Displacement_c0, vUVCoords_c0).xyz * lod_c0;
                     largeWavesBias = displacement.y;
                 
+                    displacement += texture2D(_Displacement_c1, vUVCoords_c1).xyz * lod_c1;
+                    displacement += texture2D(_Displacement_c2, vUVCoords_c2).xyz * lod_c2;
+        
                     worldPos.xyz += displacement;
 
                     vLodScales = vec4(lod_c0, lod_c1, lod_c2, max(displacement.y - largeWavesBias * 0.8 - _SSSBase, 0) / _SSSScale);
@@ -184,8 +199,8 @@ export class Ocean implements CreateSceneClass {
                 `);
 
                 mat.Fragment_Custom_MetallicRoughness(`
-                    float jacobian = texture2D(_Turbulence_c0, vUVCoords_c0).x;
-                    jacobian = min(1.0, max(0.0, (-jacobian + _FoamBiasLOD0) * _FoamScale));
+                    float jacobian = texture2D(_Turbulence_c0, vUVCoords_c0).x + texture2D(_Turbulence_c1, vUVCoords_c1).x + texture2D(_Turbulence_c2, vUVCoords_c2).x;
+                    jacobian = min(1.0, max(0.0, (-jacobian + _FoamBiasLOD2) * _FoamScale));
 
                     float distanceGloss = mix(1.0 - metallicRoughness.g, _MaxGloss, 1.0 / (1.0 + length(vViewVector) * _RoughnessScale));
                     metallicRoughness.g = 1.0 - mix(distanceGloss, 0.0, jacobian);
@@ -193,11 +208,14 @@ export class Ocean implements CreateSceneClass {
 
                 mat.Fragment_Before_Lights(`
                     vec4 derivatives = texture2D(_Derivatives_c0, vUVCoords_c0);
+                    derivatives += texture2D(_Derivatives_c1, vUVCoords_c1) * vLodScales.y;
+                    derivatives += texture2D(_Derivatives_c2, vUVCoords_c2) * vLodScales.z;
+        
                     vec2 slope = vec2(derivatives.x / (1.0 + derivatives.z), derivatives.y / (1.0 + derivatives.w));
                     normalW = normalize(vec3(-slope.x, 1.0, -slope.y));
 
-                    float jacobian = texture2D(_Turbulence_c0, vUVCoords_c0).x;
-                    jacobian = min(1.0, max(0.0, (-jacobian + _FoamBiasLOD0) * _FoamScale));
+                    float jacobian = texture2D(_Turbulence_c0, vUVCoords_c0).x + texture2D(_Turbulence_c1, vUVCoords_c1).x + texture2D(_Turbulence_c2, vUVCoords_c2).x;
+                    jacobian = min(1.0, max(0.0, (-jacobian + _FoamBiasLOD2) * _FoamScale));
 
                     //vec2 screenUV = gl_FragCoords.xy / gl_FragCoords.w;
                     //float backgroundDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenUV));
