@@ -33,6 +33,13 @@ export class RTTDebug {
         this._guiTexts[index].text = name;
     }
 
+    public show(show: boolean): void {
+        for (const plane of this._debugPlaneList) {
+            plane.setEnabled(show);
+        }
+        this._gui.layer!.isEnabled = show;
+    }
+
     constructor(scene: BABYLON.Scene, engine: BABYLON.Engine, numPlanes = 5) {
         this._engine = engine;
         this._scene = scene;

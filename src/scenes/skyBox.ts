@@ -23,6 +23,10 @@ export class SkyBox {
 
         this._skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size: 1000.0, sideOrientation: BABYLON.Mesh.BACKSIDE}, this._scene);
 
+        scene.onBeforeRenderObservable.add(() => {
+            this._skybox.position = scene.activeCameras?.[0].position ?? scene.activeCamera!.position;
+        });
+
         if (useProcedural) {
             this._initProceduralSkybox();
         } else {
@@ -48,6 +52,7 @@ export class SkyBox {
     private _initProceduralSkybox(): void {
         this._skyMaterial = new SkyMaterial('sky', this._scene);
         this._skybox.material = this._skyMaterial;
+        this._skybox.material.disableDepthWrite = true;
 
         this._skyMaterial.azimuth = 0.307;
         this._skyMaterial.inclination = 0.0;

@@ -10,6 +10,7 @@ const sunDirection = new Vector3Float32();
 const up = new Vector3Float32();
 const temp1 = new Vector3Float32(); // simplifiedRayleigh
 const temp2 = new Vector3Float32(); // totalMie
+const temp3 = new Vector3Float32(); // retColor
 const EE = f32(1000.0);
 const cutoffAngle = f32(PI / f32(1.95));
 const steepness = f32(1.5);
@@ -152,7 +153,9 @@ const texColorCst = new Vector3Float32(f32(f32(0.0) * f32(0.3)), f32(f32(0.001) 
     const curr = Uncharted2Tonemap(texColor.scale(f32(Math.log2(f32(2.0 / f32(Math.pow(this.luminance, 4.0)))))));
 
     //vec3 retColor = curr*whiteScale;
-    const retColor = Vector3Float32.Clamp(curr.multiply(whiteScale), halfOneVec, unitVec);
+    Vector3Float32.ClampToRef(curr.multiply(whiteScale), halfOneVec, unitVec, temp3);
+
+    const retColor = new BABYLON.Color3(temp3.x, temp3.y, temp3.z);
 
     return retColor;
 };
