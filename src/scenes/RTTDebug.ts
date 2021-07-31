@@ -37,6 +37,15 @@ export class RTTDebug {
         for (const plane of this._debugPlaneList) {
             plane.setEnabled(show);
         }
+        for (const gelem of this._guiBackgrounds) {
+            gelem.isVisible = false;
+        }
+        for (const gelem of this._guiTexts) {
+            gelem.isVisible = false;
+        }
+        for (const gelem of this._guiButtons) {
+            gelem.isVisible = false;
+        }
         this._gui.layer!.isEnabled = show;
     }
 
