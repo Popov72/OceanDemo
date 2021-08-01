@@ -84,6 +84,8 @@ export class RTTDebug {
 
         this._gui.addControl(grid);
 
+        const root = new BABYLON.TransformNode("rttDebug", this._scene);
+
         for (let i = 0; i < numPlanes; ++i) {
             const plane = BABYLON.MeshBuilder.CreatePlane("plane" + i, { size: 1 }, this._scene);
             const uvs = plane.getVerticesData("uv")!;
@@ -98,6 +100,7 @@ export class RTTDebug {
             plane.position.x += 0.5;
             plane.position.y -= 0.5;
             plane.bakeCurrentTransformIntoVertices();
+            plane.parent = root;
 
             this._debugPlaneList.push(plane);
 

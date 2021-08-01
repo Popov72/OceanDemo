@@ -32,7 +32,6 @@ export class WavesGenerator {
         this._rttDebug.setTexture(0, "noise", this._noise);
 
         this.lengthScale = [250, 17, 5];
-        //this.lengthScale = [250];
         this.wavesSettings = new WavesSettings();
 
         this._cascades = [
