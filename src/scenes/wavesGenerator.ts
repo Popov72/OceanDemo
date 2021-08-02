@@ -15,9 +15,18 @@ export class WavesGenerator {
     private _fft: FFT;
     private _noise: BABYLON.Texture;
     private _cascades: WavesCascade[];
+    private _displacementMap: BABYLON.Nullable<Uint16Array>;
 
     public getCascade(num: number) {
         return this._cascades[num];
+    }
+
+    public get waterHeightMap() {
+        return this._displacementMap;
+    }
+
+    public get waterHeightMapScale() {
+        return this.lengthScale[0];
     }
 
     constructor(size: number, scene: BABYLON.Scene, rttDebug: RTTDebug, noise: BABYLON.Nullable<ArrayBuffer>) {
@@ -25,6 +34,7 @@ export class WavesGenerator {
         this._size = size;
         this._rttDebug = rttDebug;
         this._startTime = new Date().getTime() / 1000;
+        this._displacementMap = null;
 
         this._fft = new FFT(scene.getEngine(), scene, this._rttDebug, 1, size);
         this._noise = this._generateNoiseTexture(size, noise);
@@ -57,6 +67,7 @@ export class WavesGenerator {
         for (let i = 0; i < this._cascades.length; ++i) {
             this._cascades[i].calculateWavesAtTime(time);
         }
+        this._getDisplacementMap();
     }
 
     public dispose(): void {
@@ -65,6 +76,12 @@ export class WavesGenerator {
         }
         this._noise.dispose();
         this._fft.dispose();
+    }
+
+    private _getDisplacementMap(): void {
+        this._cascades[0].displacement.readPixels(undefined, undefined, undefined, undefined, true)?.then((buffer: ArrayBufferView) => {
+            this._displacementMap = new Uint16Array(buffer.buffer);
+        });
     }
 
     private _normalRandom(): number {

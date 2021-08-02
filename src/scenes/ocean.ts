@@ -3,6 +3,8 @@ import { CreateSceneClass } from "../createScene";
 import { RTTDebug } from "./RTTDebug";
 import { WavesGenerator } from "./wavesGenerator";
 import { SkyBox } from "./skyBox";
+import { OceanMaterial } from "./oceanMaterial";
+import { Buoyancy } from "./buoyancy";
 
 import "@babylonjs/loaders";
 
@@ -10,7 +12,6 @@ import noiseEXR from "../../assets/ocean/00_noise0.exr";
 import buoy from "../../assets/ocean/buoy.glb";
 import fisher_boat from "../../assets/ocean/fisher_boat.glb";
 import fishing_boat from "../../assets/ocean/fishing_boat.glb";
-import { OceanMaterial } from "./oceanMaterial";
 
 export class Ocean implements CreateSceneClass {
 
@@ -73,6 +74,7 @@ export class Ocean implements CreateSceneClass {
         buoyMesh.position.y = -0.3;
         buoyMesh.position.z = -15;
         this._depthRenderer.getDepthMap().renderList!.push(buoyMesh);
+        (window as any).buoyMesh = buoyMesh;
 
         await BABYLON.SceneLoader.AppendAsync("", fisher_boat, scene, undefined, ".glb");
 
@@ -83,6 +85,7 @@ export class Ocean implements CreateSceneClass {
         fisherBoat.position.y = 1.5;
         fisherBoat.position.z = -10;
         this._depthRenderer.getDepthMap().renderList!.push(...fisherBoat.getChildMeshes(false));
+        (window as any).fisherBoat = fisherBoat;
 
         await BABYLON.SceneLoader.AppendAsync("", fishing_boat, scene, undefined, ".glb");
 
@@ -93,6 +96,7 @@ export class Ocean implements CreateSceneClass {
         fishingBoat.position.y = 2.8;
         fishingBoat.position.z = 0.735;
         this._depthRenderer.getDepthMap().renderList!.push(...fishingBoat.getChildMeshes(false));
+        (window as any).fishingBoat = fishingBoat;
 
         const patch = BABYLON.GroundBuilder.CreateGround(
             "patch",
@@ -110,7 +114,7 @@ export class Ocean implements CreateSceneClass {
 
         const noise = await (await fetch(noiseEXR)).arrayBuffer();
 
-        const size = 256;
+        const size = 256; // must be of power of 2!
 
         const wavesGenerator = new WavesGenerator(size, scene, this._rttDebug, noise);
 
@@ -118,9 +122,16 @@ export class Ocean implements CreateSceneClass {
 
         patch.material = await oceanMaterial.getMaterial(true, true);
 
+        const buoyancy = new Buoyancy(size);
+
         scene.onBeforeRenderObservable.add(() => {
             skybox.update(this._light);
             wavesGenerator.update();
+            buoyancy.setWaterHeightMap(wavesGenerator.waterHeightMap, wavesGenerator.waterHeightMapScale);
+
+            buoyMesh.position.y = buoyancy.getWaterHeight(buoyMesh.position) - 0.3;
+            fisherBoat.position.y = buoyancy.getWaterHeight(fisherBoat.position) + 1.5;
+            fishingBoat.position.y = buoyancy.getWaterHeight(fishingBoat.position) + 2.8;
         });
 
         return scene;
