@@ -1,20 +1,46 @@
 import * as BABYLON from "@babylonjs/core";
 
+export interface BuoyancyFrame {
+    v1: BABYLON.Vector3;
+    v2?: BABYLON.Vector3;
+    v3?: BABYLON.Vector3;
+}
+
+interface MeshBoyancy {
+    mesh: BABYLON.TransformNode;
+    frame: BuoyancyFrame;
+    yOffset: number;
+}
+
 export class Buoyancy {
 
     private _size: number;
     private _displacementMap: BABYLON.Nullable<Uint16Array>;
     private _lengthScale: number;
+    private _meshes: MeshBoyancy[];
 
     constructor(size: number) {
         this._size = size;
         this._displacementMap = null;
         this._lengthScale = 0;
+        this._meshes = [];
     }
 
     public setWaterHeightMap(map: BABYLON.Nullable<Uint16Array>, lengthScale: number): void {
         this._displacementMap = map;
         this._lengthScale = lengthScale;
+    }
+
+    public addMesh(mesh: BABYLON.TransformNode, frame: BuoyancyFrame, yOffset = 0): void {
+        this._meshes.push({ mesh, frame, yOffset });
+    }
+
+    public update(): void {
+        for (let i = 0; i < this._meshes.length; ++i) {
+            const { mesh, frame, yOffset } = this._meshes[i];
+
+            mesh.position.y = this.getWaterHeight(frame.v1) + yOffset;
+        }
     }
 
     public getWaterHeight(position: BABYLON.Vector3): number {
