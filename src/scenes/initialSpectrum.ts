@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
-import { RTTDebug } from "./RTTDebug";
-import { ComputeHelper } from "./computeHelper";
+import { RTTDebug } from "./tools/RTTDebug";
+import { ComputeHelper } from "./tools/computeHelper";
 import { WavesSettings } from "./wavesSettings";
 
 import initialSpectrumCS from "../../assets/ocean/initialSpectrum.wgsl";

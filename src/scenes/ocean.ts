@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 import { CreateSceneClass } from "../createScene";
-import { RTTDebug } from "./RTTDebug";
+import { RTTDebug } from "./tools/RTTDebug";
 import { WavesGenerator } from "./wavesGenerator";
 import { SkyBox } from "./skyBox";
 import { OceanMaterial } from "./oceanMaterial";

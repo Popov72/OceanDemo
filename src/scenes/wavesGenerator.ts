@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 import { FFT } from "./fft";
-import { RTTDebug } from "./RTTDebug";
+import { RTTDebug } from "./tools/RTTDebug";
 import { WavesCascade } from "./wavesCascade";
 import { WavesSettings } from "./wavesSettings";
 

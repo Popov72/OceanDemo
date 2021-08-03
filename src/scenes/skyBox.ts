@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import { SkyMaterial } from "@babylonjs/materials";
 
-import "./skyMaterialExt";
+import "./tools/skyMaterialExt";
 
 import qwantani_1k from "../../assets/environment/qwantani_1k.hdr";
 
