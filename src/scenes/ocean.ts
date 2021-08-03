@@ -11,7 +11,6 @@ import "@babylonjs/loaders";
 import noiseEXR from "../../assets/ocean/00_noise0.exr";
 import buoy from "../../assets/ocean/buoy.glb";
 import fisher_boat from "../../assets/ocean/fisher_boat.glb";
-import fishing_boat from "../../assets/ocean/fishing_boat.glb";
 
 export class Ocean implements CreateSceneClass {
 
@@ -65,9 +64,10 @@ export class Ocean implements CreateSceneClass {
         this._light.diffuse = new BABYLON.Color3(1, 0.95686275, 0.8392157);
 
         const size = 256; // must be of power of 2!
-        const buoyancy = new Buoyancy(size);
+        const buoyancy = new Buoyancy(size, 4, 0.2);
         const skybox = new SkyBox(true, scene);
 
+        // Buoy
         await BABYLON.SceneLoader.AppendAsync("", buoy, scene, undefined, ".glb");
 
         const buoyMesh = scene.getMeshByName("pTorus5_lambert1_0")!;
@@ -76,9 +76,9 @@ export class Ocean implements CreateSceneClass {
         buoyMesh.position.y = -0.3;
         buoyMesh.position.z = -15;
         this._depthRenderer.getDepthMap().renderList!.push(buoyMesh);
-        buoyancy.addMesh(buoyMesh, { v1: buoyMesh.position }, -0.3);
-        (window as any).buoyMesh = buoyMesh;
+        buoyancy.addMesh(buoyMesh, { v1: new BABYLON.Vector3(0, 5, -6), v2: new BABYLON.Vector3(0, 5, 6), v3: new BABYLON.Vector3(5, 5, -6) }, -0.3, 1);
 
+        // Fisher boat
         await BABYLON.SceneLoader.AppendAsync("", fisher_boat, scene, undefined, ".glb");
 
         const fisherBoat = scene.getTransformNodeByName("Cube.022")!;
@@ -88,21 +88,9 @@ export class Ocean implements CreateSceneClass {
         fisherBoat.position.y = 1.5;
         fisherBoat.position.z = -10;
         this._depthRenderer.getDepthMap().renderList!.push(...fisherBoat.getChildMeshes(false));
-        buoyancy.addMesh(fisherBoat, { v1: fisherBoat.position }, 1.5);
-        (window as any).fisherBoat = fisherBoat;
+        buoyancy.addMesh(fisherBoat, { v1: new BABYLON.Vector3(0, 2, 0), v2: new BABYLON.Vector3(0, -1.2, 0), v3: new BABYLON.Vector3(0.4, 2, 0) }, 1.5, 0);
 
-        await BABYLON.SceneLoader.AppendAsync("", fishing_boat, scene, undefined, ".glb");
-
-        const fishingBoat = scene.getTransformNodeByName("node_id81_1")!;
-
-        fishingBoat.scaling.setAll(0.02);
-        fishingBoat.position.x = -18;
-        fishingBoat.position.y = 2.8;
-        fishingBoat.position.z = 0.735;
-        this._depthRenderer.getDepthMap().renderList!.push(...fishingBoat.getChildMeshes(false));
-        buoyancy.addMesh(fishingBoat, { v1: fishingBoat.position }, 2.8);
-        (window as any).fishingBoat = fishingBoat;
-
+        // Water surface
         const patch = BABYLON.GroundBuilder.CreateGround(
             "patch",
             { width: 242, height: 242, subdivisions: 240 },

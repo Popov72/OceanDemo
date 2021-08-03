@@ -6,10 +6,15 @@ export interface BuoyancyFrame {
     v3?: BABYLON.Vector3;
 }
 
-interface MeshBoyancy {
+interface MeshBuoyancy {
     mesh: BABYLON.TransformNode;
     frame: BuoyancyFrame;
     yOffset: number;
+    spaceCoordinates: number;
+    initQuaternion: BABYLON.Quaternion;
+    curQuaternion:  BABYLON.Quaternion;
+    stepQuaternion:  BABYLON.Quaternion;
+    curStep: number;
 }
 
 export class Buoyancy {
@@ -17,12 +22,16 @@ export class Buoyancy {
     private _size: number;
     private _displacementMap: BABYLON.Nullable<Uint16Array>;
     private _lengthScale: number;
-    private _meshes: MeshBoyancy[];
+    private _meshes: MeshBuoyancy[];
+    private _numSteps: number;
+    private _attenuation: number;
 
-    constructor(size: number) {
+    constructor(size: number, numSteps: number = 5, attenuation: number = 1) {
         this._size = size;
         this._displacementMap = null;
         this._lengthScale = 0;
+        this._numSteps = numSteps;
+        this._attenuation = attenuation;
         this._meshes = [];
     }
 
@@ -31,15 +40,29 @@ export class Buoyancy {
         this._lengthScale = lengthScale;
     }
 
-    public addMesh(mesh: BABYLON.TransformNode, frame: BuoyancyFrame, yOffset = 0): void {
-        this._meshes.push({ mesh, frame, yOffset });
+    public addMesh(mesh: BABYLON.TransformNode, frame: BuoyancyFrame, yOffset = 0, spaceCoordinates = 0): void {
+        this._meshes.push({ mesh, frame, yOffset, spaceCoordinates, initQuaternion: mesh.rotationQuaternion!.clone(), curStep: 0, curQuaternion: new BABYLON.Quaternion(), stepQuaternion: new BABYLON.Quaternion() });
+    }
+
+    public get attenuation() {
+        return this._attenuation;
+    }
+
+    public set attenuation(val: number) {
+        this._attenuation = val;
+    }
+
+    public get numSteps() {
+        return this._numSteps;
+    }
+
+    public set numSteps(val: number) {
+        this._numSteps = val;
     }
 
     public update(): void {
         for (let i = 0; i < this._meshes.length; ++i) {
-            const { mesh, frame, yOffset } = this._meshes[i];
-
-            mesh.position.y = this.getWaterHeight(frame.v1) + yOffset;
+            this._updateMesh(this._meshes[i]);
         }
     }
 
@@ -55,6 +78,77 @@ export class Buoyancy {
         this._getWaterDisplacement(position, tmp);
 
         return tmp.y;
+    }
+
+    private _updateMesh(meshBuoyancy: MeshBuoyancy): void {
+        const tmp = BABYLON.TmpVectors.Vector3[5];
+        const tmp2 = BABYLON.TmpVectors.Vector3[6];
+        const tmp3 = BABYLON.TmpVectors.Vector3[7];
+        const forward = BABYLON.TmpVectors.Vector3[8];
+        const right = BABYLON.TmpVectors.Vector3[9];
+        const normal = BABYLON.TmpVectors.Vector3[10];
+        const forwardU = BABYLON.TmpVectors.Vector3[11];
+        const rightU = BABYLON.TmpVectors.Vector3[12];
+
+        const { mesh, frame, yOffset, spaceCoordinates, initQuaternion, curQuaternion, stepQuaternion, curStep } = meshBuoyancy;
+
+        BABYLON.Vector3.TransformCoordinatesToRef(frame.v1, mesh.getWorldMatrix(), tmp);
+
+        const y = this.getWaterHeight(tmp);
+
+        mesh.position.y = y + yOffset;
+
+        if (frame.v2 && frame.v3) {
+            if (curStep < this._numSteps) {
+                meshBuoyancy.curStep++;
+                curQuaternion.multiplyToRef(stepQuaternion, curQuaternion);
+                initQuaternion.multiplyToRef(curQuaternion, mesh.rotationQuaternion!);
+                return;
+            }
+
+            BABYLON.Vector3.TransformCoordinatesToRef(frame.v2, mesh.getWorldMatrix(), tmp2);
+            tmp2.subtractToRef(tmp, forwardU);
+            forwardU.normalize();
+
+            BABYLON.Vector3.TransformCoordinatesToRef(frame.v3, mesh.getWorldMatrix(), tmp3);
+            tmp3.subtractToRef(tmp, rightU);
+            rightU.normalize();
+
+            tmp.y = y;
+
+            forward.copyFrom(tmp2);
+            forward.y = this.getWaterHeight(tmp2);
+            forward.subtractToRef(tmp, forward);
+            forward.normalize();
+
+            right.copyFrom(tmp3);
+            right.y = this.getWaterHeight(tmp3);
+            right.subtractToRef(tmp, right);
+            right.normalize();
+
+            BABYLON.Vector3.CrossToRef(right, forward, normal);
+            BABYLON.Vector3.CrossToRef(forward, normal, right);
+
+            right.normalize();
+
+            let xa = Math.acos(BABYLON.Scalar.Clamp(BABYLON.Vector3.Dot(forwardU, forward), 0, 1)) * this._attenuation;
+            if (forward.y > forwardU.y) xa = -xa;
+
+            let za = Math.acos(BABYLON.Scalar.Clamp(BABYLON.Vector3.Dot(rightU, right), 0, 1)) * this._attenuation;
+
+            switch (spaceCoordinates) {
+                case 0:
+                    if (right.y > rightU.y) za = -za;
+                    BABYLON.Quaternion.FromEulerAnglesToRef(xa / this._numSteps, za / this._numSteps, 0, meshBuoyancy.stepQuaternion);
+                    break;
+                case 1:
+                    if (right.y < rightU.y) za = -za;
+                    BABYLON.Quaternion.FromEulerAnglesToRef(xa / this._numSteps, 0, za / this._numSteps, meshBuoyancy.stepQuaternion);
+                    break;
+            }
+
+            meshBuoyancy.curStep = 0;
+        }
     }
 
     private _getWaterDisplacement(position: BABYLON.Vector3, result: BABYLON.Vector3): void {
