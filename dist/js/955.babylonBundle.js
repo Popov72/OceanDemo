@@ -1,0 +1,1 @@
+(self.webpackChunkbabylonjs_typescript_webpack_simple_scene=self.webpackChunkbabylonjs_typescript_webpack_simple_scene||[]).push([[955],{3955:()=>{}}]);

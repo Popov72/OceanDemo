@@ -34,7 +34,7 @@ export class WavesSettings {
     public lambda = 1;
     public local: DisplaySpectrumSettings = {
         scale: 1,
-        windSpeed: 0.5,
+        windSpeed: 2.5,
         windDirection: -29.81,
         fetch: 100000,
         spreadBlend: 1,

@@ -48,8 +48,10 @@ export class Ocean implements CreateSceneClass {
 
         scene.environmentIntensity = 1;
 
-        this._camera = new BABYLON.FreeCamera("mainC", new BABYLON.Vector3(0, 3.61, -10), scene);
-        this._camera.rotation.y = 160 * Math.PI / 180;
+        //this._camera = new BABYLON.FreeCamera("mainC", new BABYLON.Vector3(0, 3.61, -10), scene);
+        this._camera = new BABYLON.FreeCamera("mainC", new BABYLON.Vector3(-17.3, 5, -9), scene);
+        //this._camera.rotation.y = 160 * Math.PI / 180;
+        this._camera.rotation.set(0.21402315044176745, 1.5974857677541419, 0);
         this._camera.minZ = 1;
         this._camera.maxZ = 1000;
 
@@ -91,7 +93,7 @@ export class Ocean implements CreateSceneClass {
         this._depthRenderer.getDepthMap().renderList!.push(...fisherBoat.getChildMeshes(false));
         buoyancy.addMesh(fisherBoat, { v1: new BABYLON.Vector3(0, 2, 0), v2: new BABYLON.Vector3(0, -1.2, 0), v3: new BABYLON.Vector3(0.4, 2, 0) }, 1.5, 0);
 
-        // Fisher boat
+        // Dart tsunami buoy
         await BABYLON.SceneLoader.AppendAsync("", dart_tsunami_buoy, scene, undefined, ".glb");
 
         const dartTsunamiBuoy = scene.getMeshByName("tsunami_buoy_tsunami_buoy_0")! as BABYLON.Mesh;
