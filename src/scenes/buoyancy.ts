@@ -132,17 +132,23 @@ export class Buoyancy {
             right.normalize();
 
             let xa = Math.acos(BABYLON.Scalar.Clamp(BABYLON.Vector3.Dot(forwardU, forward), 0, 1)) * this._attenuation;
-            if (forward.y > forwardU.y) xa = -xa;
 
             let za = Math.acos(BABYLON.Scalar.Clamp(BABYLON.Vector3.Dot(rightU, right), 0, 1)) * this._attenuation;
 
             switch (spaceCoordinates) {
                 case 0:
+                    if (forward.y > forwardU.y) xa = -xa;
                     if (right.y > rightU.y) za = -za;
                     BABYLON.Quaternion.FromEulerAnglesToRef(xa / this._numSteps, za / this._numSteps, 0, meshBuoyancy.stepQuaternion);
                     break;
                 case 1:
+                    if (forward.y > forwardU.y) xa = -xa;
                     if (right.y < rightU.y) za = -za;
+                    BABYLON.Quaternion.FromEulerAnglesToRef(xa / this._numSteps, 0, za / this._numSteps, meshBuoyancy.stepQuaternion);
+                    break;
+                case 2:
+                    if (forward.y > forwardU.y) xa = -xa;
+                    if (right.y > rightU.y) za = -za;
                     BABYLON.Quaternion.FromEulerAnglesToRef(xa / this._numSteps, 0, za / this._numSteps, meshBuoyancy.stepQuaternion);
                     break;
             }

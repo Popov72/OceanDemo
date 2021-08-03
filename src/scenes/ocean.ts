@@ -11,6 +11,7 @@ import "@babylonjs/loaders";
 import noiseEXR from "../../assets/ocean/00_noise0.exr";
 import buoy from "../../assets/ocean/buoy.glb";
 import fisher_boat from "../../assets/ocean/fisher_boat.glb";
+import dart_tsunami_buoy from "../../assets/ocean/dart_tsunami_buoy.glb";
 
 export class Ocean implements CreateSceneClass {
 
@@ -89,6 +90,39 @@ export class Ocean implements CreateSceneClass {
         fisherBoat.position.z = -10;
         this._depthRenderer.getDepthMap().renderList!.push(...fisherBoat.getChildMeshes(false));
         buoyancy.addMesh(fisherBoat, { v1: new BABYLON.Vector3(0, 2, 0), v2: new BABYLON.Vector3(0, -1.2, 0), v3: new BABYLON.Vector3(0.4, 2, 0) }, 1.5, 0);
+
+        // Fisher boat
+        await BABYLON.SceneLoader.AppendAsync("", dart_tsunami_buoy, scene, undefined, ".glb");
+
+        const dartTsunamiBuoy = scene.getMeshByName("tsunami_buoy_tsunami_buoy_0")! as BABYLON.Mesh;
+
+        dartTsunamiBuoy.scaling.setAll(0.07/4);
+        dartTsunamiBuoy.bakeCurrentTransformIntoVertices();
+        dartTsunamiBuoy.parent = null;
+        dartTsunamiBuoy.alwaysSelectAsActiveMesh = true;
+
+        this._depthRenderer.getDepthMap().renderList!.push(dartTsunamiBuoy);
+        buoyancy.addMesh(dartTsunamiBuoy, { v1: new BABYLON.Vector3(0.7, 1, -1.5), v2: new BABYLON.Vector3(0.7, 1, 1.5), v3: new BABYLON.Vector3(-1.5, 1, -1.5) }, -0.5, 2);
+
+        const sp1 = BABYLON.MeshBuilder.CreateSphere("sp1", { diameter: 1.2 }, scene);
+        sp1.parent = dartTsunamiBuoy;
+        sp1.position.x = 0.7;
+        sp1.position.y = 1;
+        sp1.position.z = -1.5;
+
+        const sp2 = BABYLON.MeshBuilder.CreateSphere("sp2", { diameter: 1.2 }, scene);
+        sp2.parent = dartTsunamiBuoy;
+        sp2.position.x = 0.7;
+        sp2.position.y = 1;
+        sp2.position.z = 1.5;
+
+        const sp3 = BABYLON.MeshBuilder.CreateSphere("sp3", { diameter: 1.2 }, scene);
+        sp3.parent = dartTsunamiBuoy;
+        sp3.position.x = -1.5;
+        sp3.position.y = 1;
+        sp3.position.z = -1.5;
+
+        scene.stopAllAnimations();
 
         // Water surface
         const patch = BABYLON.GroundBuilder.CreateGround(
