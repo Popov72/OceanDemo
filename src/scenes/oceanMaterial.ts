@@ -27,7 +27,7 @@ export class OceanMaterial {
 
         if (!useNodeMaterial) {
 
-            mat = new PBRCustomMaterial("mat", this._scene);
+            mat = new PBRCustomMaterial("oceanMat" + (useMid ? "1" : "0") + (useClose ? "1" : "0"), this._scene);
 
             mat.metallic = 0;
             mat.roughness = 0.311;
@@ -36,10 +36,19 @@ export class OceanMaterial {
             //mat.realTimeFilteringQuality = BABYLON.Constants.TEXTURE_FILTERING_QUALITY_HIGH;
             //mat.wireframe = true;
 
+            const color = new BABYLON.Vector3(0.03457636, 0.12297464, 0.1981132);
+            /*if (useMid && useClose) {
+                color.y = color.z = 0;
+            } else if (useMid && !useClose) {
+                color.x = color.z = 0;
+            } else {
+                color.x = color.y = 0;
+            }*/
+
             mat.AddUniform("_LOD_scale", "float", 7.13);
             mat.AddUniform("_FoamColor", "vec3", new BABYLON.Vector3(1, 1, 1));
             mat.AddUniform("_SSSStrength", "float", 0.133);
-            mat.AddUniform("_Color", "vec3", new BABYLON.Vector3(0.03457636, 0.12297464, 0.1981132));
+            mat.AddUniform("_Color", "vec3", color);
             mat.AddUniform("_SSSColor", "vec3", new BABYLON.Vector3(0.1541919, 0.8857628, 0.990566));
             mat.AddUniform("_SSSBase", "float", -0.1);
             mat.AddUniform("_SSSScale", "float", 4.8);
@@ -209,9 +218,13 @@ export class OceanMaterial {
             });
 
             return new Promise((resolve) => {
-                this._foamTexture.onLoadObservable.addOnce(() => {
+                if (this._foamTexture.isReady()) {
                     resolve(mat);
-                });
+                } else {
+                    this._foamTexture.onLoadObservable.addOnce(() => {
+                        resolve(mat);
+                    });
+                }
             });
         } else {
             mat = await BABYLON.NodeMaterial.ParseFromSnippetAsync("R4152I#24", this._scene);

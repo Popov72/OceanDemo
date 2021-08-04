@@ -5,6 +5,7 @@ import { WavesGenerator } from "./wavesGenerator";
 import { SkyBox } from "./skyBox";
 import { OceanMaterial } from "./oceanMaterial";
 import { Buoyancy } from "./buoyancy";
+import { OceanGeometry } from "./oceanGeometry";
 
 import "@babylonjs/loaders";
 
@@ -48,12 +49,12 @@ export class Ocean implements CreateSceneClass {
 
         scene.environmentIntensity = 1;
 
-        //this._camera = new BABYLON.FreeCamera("mainC", new BABYLON.Vector3(0, 3.61, -10), scene);
-        this._camera = new BABYLON.FreeCamera("mainC", new BABYLON.Vector3(-17.3, 5, -9), scene);
+        //this._camera = new BABYLON.FreeCamera("mainCamera", new BABYLON.Vector3(0, 3.61, -10), scene);
+        this._camera = new BABYLON.FreeCamera("mainCamera", new BABYLON.Vector3(-17.3, 5, -9), scene);
         //this._camera.rotation.y = 160 * Math.PI / 180;
         this._camera.rotation.set(0.21402315044176745, 1.5974857677541419, 0);
         this._camera.minZ = 1;
-        this._camera.maxZ = 1000;
+        this._camera.maxZ = 1000000;
 
         scene.activeCameras = [this._camera, this._rttDebug.camera];
 
@@ -126,31 +127,19 @@ export class Ocean implements CreateSceneClass {
 
         scene.stopAllAnimations();
 
-        // Water surface
-        const patch = BABYLON.GroundBuilder.CreateGround(
-            "patch",
-            { width: 242, height: 242, subdivisions: 240 },
-            scene
-        );
-
-        patch.position.x = 242/2;
-        patch.position.z = 242/2;
-        patch.bakeCurrentTransformIntoVertices();
-        (window as any).pp=patch;
-
-        patch.position.set(-14.9, 0, -25);
-        patch.scaling.set(0.12397, 1, 0.12397);
-
         const noise = await (await fetch(noiseEXR)).arrayBuffer();
 
         const wavesGenerator = new WavesGenerator(size, scene, this._rttDebug, noise);
 
         const oceanMaterial = new OceanMaterial(wavesGenerator, this._depthRenderer, scene);
 
-        patch.material = await oceanMaterial.getMaterial(true, true);
+        const oceanGeometry = new OceanGeometry(oceanMaterial, this._camera, scene);
+
+        await oceanGeometry.initialize();
 
         scene.onBeforeRenderObservable.add(() => {
             skybox.update(this._light);
+            oceanGeometry.update();
             wavesGenerator.update();
             buoyancy.setWaterHeightMap(wavesGenerator.waterHeightMap, wavesGenerator.waterHeightMapScale);
             buoyancy.update();

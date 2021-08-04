@@ -33,7 +33,7 @@ export class WavesSettings {
     //[Range(0, 1)]
     public lambda = 1;
     public local: DisplaySpectrumSettings = {
-        scale: 1,
+        scale: 0.5,
         windSpeed: 2.5,
         windDirection: -29.81,
         fetch: 100000,
@@ -43,9 +43,9 @@ export class WavesSettings {
         shortWavesFade: 0.01,
     };
     public swell: DisplaySpectrumSettings = {
-        scale: 0,
-        windSpeed: 1,
-        windDirection: 0,
+        scale: 0.5,
+        windSpeed: 1.5,
+        windDirection: 90,
         fetch: 300000,
         spreadBlend: 1,
         swell: 1,
