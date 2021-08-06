@@ -59,6 +59,7 @@ export class OceanMaterial {
             mat.AddUniform("_FoamBiasLOD2", "float", 2.72);
             mat.AddUniform("_FoamScale", "float", 2.4);
             mat.AddUniform("_ContactFoam", "float", 1);
+            mat.AddUniform("lightDirection", "vec3", "");
 
             mat.AddUniform("_WorldSpaceCameraPos", "vec3", "");
             mat.AddUniform("LengthScale0", "float", this._wavesGenerator.lengthScale[0]);
@@ -183,7 +184,7 @@ export class OceanMaterial {
                 surfaceAlbedo = mix(vec3(0.0), _FoamColor, jacobian);
 
                 vec3 viewDir = normalize(vViewVector);
-                vec3 H = normalize(-normalW + light0.vLightData.xyz);
+                vec3 H = normalize(-normalW + lightDirection);
                 float ViewDotH = pow5(saturate(dot(viewDir, -H))) * 30.0 * _SSSStrength;
                 vec3 color = mix(_Color, saturate(_Color + _SSSColor.rgb * ViewDotH * vLodScales.w), vLodScales.z);
     
@@ -214,6 +215,7 @@ export class OceanMaterial {
                 mat.getEffect()?.setTexture("_Turbulence_c1", this._wavesGenerator.getCascade(1).turbulence);
                 mat.getEffect()?.setTexture("_Turbulence_c2", this._wavesGenerator.getCascade(2).turbulence);
                 mat.getEffect()?.setFloat("_Time", time);
+                mat.getEffect()?.setVector3("lightDirection", (this._scene.lights[0] as BABYLON.DirectionalLight).direction);
                 //mat.getEffect()?.setVector3("_FoamColor", new BABYLON.Vector3(this._light.diffuse.r, this._light.diffuse.g, this._light.diffuse.b));
             });
 

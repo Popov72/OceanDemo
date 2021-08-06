@@ -54,7 +54,7 @@ export class Ocean implements CreateSceneClass {
         //this._camera.rotation.y = 160 * Math.PI / 180;
         this._camera.rotation.set(0.21402315044176745, 1.5974857677541419, 0);
         this._camera.minZ = 1;
-        this._camera.maxZ = 1000000;
+        this._camera.maxZ = 100000;
 
         scene.activeCameras = [this._camera, this._rttDebug.camera];
 
@@ -107,7 +107,7 @@ export class Ocean implements CreateSceneClass {
         this._depthRenderer.getDepthMap().renderList!.push(dartTsunamiBuoy);
         buoyancy.addMesh(dartTsunamiBuoy, { v1: new BABYLON.Vector3(0.7, 1, -1.5), v2: new BABYLON.Vector3(0.7, 1, 1.5), v3: new BABYLON.Vector3(-1.5, 1, -1.5) }, -0.5, 2);
 
-        const sp1 = BABYLON.MeshBuilder.CreateSphere("sp1", { diameter: 1.2 }, scene);
+        /*const sp1 = BABYLON.MeshBuilder.CreateSphere("sp1", { diameter: 1.2 }, scene);
         sp1.parent = dartTsunamiBuoy;
         sp1.position.x = 0.7;
         sp1.position.y = 1;
@@ -123,7 +123,7 @@ export class Ocean implements CreateSceneClass {
         sp3.parent = dartTsunamiBuoy;
         sp3.position.x = -1.5;
         sp3.position.y = 1;
-        sp3.position.z = -1.5;
+        sp3.position.z = -1.5;*/
 
         scene.stopAllAnimations();
 
@@ -136,6 +136,9 @@ export class Ocean implements CreateSceneClass {
         const oceanGeometry = new OceanGeometry(oceanMaterial, this._camera, scene);
 
         await oceanGeometry.initialize();
+
+        const pp = new BABYLON.FxaaPostProcess("fxaa", 1, this._camera);
+        pp.samples = engine.getCaps().maxMSAASamples;
 
         scene.onBeforeRenderObservable.add(() => {
             skybox.update(this._light);

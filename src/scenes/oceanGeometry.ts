@@ -16,10 +16,12 @@ export class OceanGeometry {
     public vertexDensity = 30; // 1-40 int
     public clipLevels = 8; // 0-8 int
     public skirtSize = 55.4; // 0-100 float
-    public noMaterialLod = true;
+    public noMaterialLod = true
+    public useSkirt = true;
 
     private _scene: BABYLON.Scene;
     private _camera: BABYLON.Camera;
+    private _root: BABYLON.TransformNode;
     private _oceanMaterial: OceanMaterial;
     private _materials: BABYLON.Material[];
     private _trimRotations: BABYLON.Quaternion[];
@@ -33,6 +35,7 @@ export class OceanGeometry {
         this._camera = camera;
         this._scene = scene;
         this._materials = [];
+        this._root = new BABYLON.TransformNode("Ocean", scene);
         this._center = null as any;
         this._skirt = null as any;
         this._rings = [];
@@ -71,7 +74,9 @@ export class OceanGeometry {
             this._trims[i].material = this._getMaterial(this.noMaterialLod ? 0 : this.clipLevels - activeLevels - i);
         }
 
-        this._skirt.material = this.noMaterialLod ? this._materials[0] : this._materials[2];
+        if (this.useSkirt) {
+            this._skirt.material = this.noMaterialLod ? this._materials[0] : this._materials[2];
+        }
     }
 
     private _updatePositions(): void {
@@ -125,9 +130,11 @@ export class OceanGeometry {
             previousSnappedPosition.copyFrom(snappedPosition);
         }
 
-        scale = this.lengthScale * 2 * Math.pow(2, this.clipLevels);
-        this._skirt.position.copyFrom(previousSnappedPosition).addInPlaceFromFloats(-scale * (this.skirtSize + 0.5 - 0.5 / k), 0, -scale * (this.skirtSize + 0.5 - 0.5 / k));
-        this._skirt.scaling.set(scale, 1, scale);
+        if (this.useSkirt) {
+            scale = this.lengthScale * 2 * Math.pow(2, this.clipLevels);
+            this._skirt.position.copyFrom(previousSnappedPosition).addInPlaceFromFloats(-scale * (this.skirtSize + 0.5 - 0.5 / k), 0, -scale * (this.skirtSize + 0.5 - 0.5 / k));
+            this._skirt.scaling.set(scale, 1, scale);
+        }
     }
 
     private get _activeLodLevels(): number {
@@ -194,8 +201,9 @@ export class OceanGeometry {
             this._trims.push(this._instantiateElement("Trim " + i, trim, this._materials[this._materials.length - 1], i > 0));
         }
 
-        this._skirt = this._instantiateElement("Skirt", this._createSkirtMesh(k, this.skirtSize), this._materials[this._materials.length - 1]);
-        this._skirt.showBoundingBox = true;
+        if (this.useSkirt) {
+            this._skirt = this._instantiateElement("Skirt", this._createSkirtMesh(k, this.skirtSize), this._materials[this._materials.length - 1]);
+        }
     }
 
     private _instantiateElement(name: string, mesh: BABYLON.Mesh, mat: BABYLON.Material, clone = false): BABYLON.Mesh {
@@ -205,6 +213,7 @@ export class OceanGeometry {
 
         mesh.name = name;
         mesh.material = mat;
+        mesh.parent = this._root;
 
         return mesh;
     }

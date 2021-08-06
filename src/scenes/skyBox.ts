@@ -65,7 +65,6 @@ export class SkyBox {
 
         // Reflection probe
         this._probe = new BABYLON.ReflectionProbe('skyProbe', 128, this._scene, true, true, true);
-        this._probe.cubeTexture.gammaSpace = true; // the SkyMaterial is generating data in gamma space
         this._probe.renderList!.push(this._skybox);
 
         this._probe.cubeTexture.refreshRate = 0;

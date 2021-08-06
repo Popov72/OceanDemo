@@ -29,7 +29,7 @@ export class RTTDebug {
             });
         }
         this._debugPlaneList[index].name = name;
-        this._debugPlaneList[index].material!.name = name;
+        this._debugPlaneList[index].material!.name = "rttDebug_" + name;
         this._guiTexts[index].text = name;
     }
 
