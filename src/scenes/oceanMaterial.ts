@@ -13,13 +13,17 @@ export class OceanMaterial {
     private _foamTexture: BABYLON.Texture;
     private _startTime: number;
 
-    constructor(wavesGenerator: WavesGenerator, depthRenderer: BABYLON.DepthRenderer, scene: BABYLON.Scene) {
-        this._wavesGenerator = wavesGenerator;
+    constructor(depthRenderer: BABYLON.DepthRenderer, scene: BABYLON.Scene) {
+        this._wavesGenerator = null as any;
         this._depthRenderer = depthRenderer;
         this._scene = scene;
         this._camera = scene.activeCameras?.[0] ?? scene.activeCamera!;
         this._foamTexture = new BABYLON.Texture(foamPicture, this._scene);
         this._startTime = new Date().getTime() / 1000;
+    }
+
+    public setWavesGenerator(wavesGenerator: WavesGenerator): void {
+        this._wavesGenerator = wavesGenerator;
     }
 
     public async getMaterial(useMid: boolean, useClose: boolean, useNodeMaterial = false): Promise<BABYLON.Material> {

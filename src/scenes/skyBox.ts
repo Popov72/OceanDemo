@@ -13,9 +13,18 @@ export class SkyBox {
     private _skyMaterial: SkyMaterial;
     private _probe: BABYLON.ReflectionProbe;
     private _oldSunPosition: BABYLON.Vector3;
+    private _dirty: boolean;
 
     public get probe(): BABYLON.Nullable<BABYLON.ReflectionProbe> {
         return this._probe;
+    }
+
+    public get skyMaterial() {
+        return this._skyMaterial;
+    }
+
+    public setAsDirty(): void {
+        this._dirty = true;
     }
 
     constructor(useProcedural: boolean, scene: BABYLON.Scene) {
@@ -24,6 +33,7 @@ export class SkyBox {
         this._oldSunPosition = new BABYLON.Vector3();
         this._skyMaterial = null as any;
         this._probe = null as any;
+        this._dirty = false;
 
         this._skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size: 1000.0, sideOrientation: BABYLON.Mesh.BACKSIDE}, this._scene);
 
@@ -42,15 +52,14 @@ export class SkyBox {
         if (!this._procedural) {
             return;
         }
-        if (!this._oldSunPosition.equals(this._skyMaterial.sunPosition)) {
+        if (!this._oldSunPosition.equals(this._skyMaterial.sunPosition) || this._dirty) {
+            this._dirty = false;
             this._probe.cubeTexture.refreshRate = 0;
             this._oldSunPosition.copyFrom(this._skyMaterial.sunPosition);
         }
-        //this._skyMaterial.inclination = 0.5 - Math.abs(Math.cos(t)) / 2;
         light.position = this._skyMaterial.sunPosition;
         light.direction = this._skyMaterial.sunPosition.negate().normalize();
         light.diffuse = (this._skyMaterial as any).getSunColor();
-        //t += 0.02;
     }
 
     private _initProceduralSkybox(): void {
@@ -89,10 +98,12 @@ export class SkyBox {
 
         const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this._scene);
         skyboxMaterial.backFaceCulling = false;
-        skyboxMaterial.reflectionTexture = reflectionTexture;
+        skyboxMaterial.reflectionTexture = reflectionTexture.clone();
         skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
         skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
         skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
         this._skybox.material = skyboxMaterial;
+
+        this._scene.environmentTexture = reflectionTexture;
     }
 }

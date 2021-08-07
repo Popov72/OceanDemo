@@ -26,6 +26,8 @@ export class Buoyancy {
     private _numSteps: number;
     private _attenuation: number;
 
+    public enabled = true;
+
     constructor(size: number, numSteps: number = 5, attenuation: number = 1) {
         this._size = size;
         this._displacementMap = null;
@@ -42,6 +44,10 @@ export class Buoyancy {
 
     public addMesh(mesh: BABYLON.TransformNode, frame: BuoyancyFrame, yOffset = 0, spaceCoordinates = 0): void {
         this._meshes.push({ mesh, frame, yOffset, spaceCoordinates, initQuaternion: mesh.rotationQuaternion!.clone(), curStep: 0, curQuaternion: new BABYLON.Quaternion(), stepQuaternion: new BABYLON.Quaternion() });
+    }
+
+    public set size(size: number) {
+        this._size = size;
     }
 
     public get attenuation() {
@@ -61,6 +67,10 @@ export class Buoyancy {
     }
 
     public update(): void {
+        if (!this.enabled) {
+            return;
+        }
+
         for (let i = 0; i < this._meshes.length; ++i) {
             this._updateMesh(this._meshes[i]);
         }

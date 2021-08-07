@@ -1,4 +1,8 @@
+/**
+ * Based on the great Unity project https://github.com/gasgiant/FFT-Ocean by Ivan Pensionerov (https://github.com/gasgiant)
+ */
 import * as BABYLON from "@babylonjs/core";
+import * as GUI from "@babylonjs/gui";
 import { CreateSceneClass } from "../createScene";
 import { RTTDebug } from "./tools/RTTDebug";
 import { WavesGenerator } from "./wavesGenerator";
@@ -6,6 +10,8 @@ import { SkyBox } from "./skyBox";
 import { OceanMaterial } from "./oceanMaterial";
 import { Buoyancy } from "./buoyancy";
 import { OceanGeometry } from "./oceanGeometry";
+import { OceanGUI } from "./oceanGui";
+import { WavesSettings } from "./wavesSettings";
 
 import "@babylonjs/loaders";
 
@@ -13,6 +19,8 @@ import noiseEXR from "../../assets/ocean/00_noise0.exr";
 import buoy from "../../assets/ocean/buoy.glb";
 import fisher_boat from "../../assets/ocean/fisher_boat.glb";
 import dart_tsunami_buoy from "../../assets/ocean/dart_tsunami_buoy.glb";
+
+const useProceduralSky = true;
 
 export class Ocean implements CreateSceneClass {
 
@@ -22,6 +30,15 @@ export class Ocean implements CreateSceneClass {
     private _rttDebug: RTTDebug;
     private _light: BABYLON.ShadowLight;
     private _depthRenderer: BABYLON.DepthRenderer;
+    private _buoyancy: Buoyancy;
+    private _wavesSettings: WavesSettings;
+    private _fxaa: BABYLON.Nullable<BABYLON.FxaaPostProcess>;
+    private _size: number;
+    private _skybox: SkyBox;
+    private _oceanMaterial: OceanMaterial;
+    private _oceanGeometry: OceanGeometry;
+    private _wavesGenerator: BABYLON.Nullable<WavesGenerator>;
+    private _useZQSD: boolean;
 
     constructor() {
         this._engine = null as any;
@@ -30,6 +47,16 @@ export class Ocean implements CreateSceneClass {
         this._rttDebug = null as any;
         this._light = null as any;
         this._depthRenderer = null as any;
+        this._buoyancy = null as any;
+        this._fxaa = null;
+        this._skybox = null as any;
+        this._oceanMaterial = null as any;
+        this._oceanGeometry = null as any;
+        this._wavesGenerator = null;
+        this._useZQSD = false;
+
+        this._size = 0;
+        this._wavesSettings = new WavesSettings();
     }
 
     public async createScene(
@@ -44,17 +71,23 @@ export class Ocean implements CreateSceneClass {
         this._engine = engine;
         this._scene = scene;
 
+        this._camera = new BABYLON.FreeCamera("mainCamera", new BABYLON.Vector3(-17.3, 5, -9), scene);
+        this._camera.rotation.set(0.21402315044176745, 1.5974857677541419, 0);
+        this._camera.minZ = 1;
+        this._camera.maxZ = 100000;
+
+        if (!this._checkSupport()) {
+            return scene;
+        }
+
+        this._setCameraKeys();
+
+        await OceanGUI.LoadDAT();
+
         this._rttDebug = new RTTDebug(scene, engine, 32);
         this._rttDebug.show(false);
 
         scene.environmentIntensity = 1;
-
-        //this._camera = new BABYLON.FreeCamera("mainCamera", new BABYLON.Vector3(0, 3.61, -10), scene);
-        this._camera = new BABYLON.FreeCamera("mainCamera", new BABYLON.Vector3(-17.3, 5, -9), scene);
-        //this._camera.rotation.y = 160 * Math.PI / 180;
-        this._camera.rotation.set(0.21402315044176745, 1.5974857677541419, 0);
-        this._camera.minZ = 1;
-        this._camera.maxZ = 100000;
 
         scene.activeCameras = [this._camera, this._rttDebug.camera];
 
@@ -67,37 +100,104 @@ export class Ocean implements CreateSceneClass {
         this._light.intensity = 1;
         this._light.diffuse = new BABYLON.Color3(1, 0.95686275, 0.8392157);
 
-        const size = 256; // must be of power of 2!
-        const buoyancy = new Buoyancy(size, 4, 0.2);
-        const skybox = new SkyBox(true, scene);
+        this._skybox = new SkyBox(useProceduralSky, scene);
+        this._buoyancy = new Buoyancy(this._size, 3, 0.2);
+        this._oceanMaterial = new OceanMaterial(this._depthRenderer, this._scene);
+        this._oceanGeometry = new OceanGeometry(this._oceanMaterial, this._camera, this._scene);
 
+        this._fxaa = new BABYLON.FxaaPostProcess("fxaa", 1, this._camera);
+        this._fxaa.samples = engine.getCaps().maxMSAASamples;
+
+        await this._loadMeshes();
+
+        scene.stopAllAnimations();
+
+        await this._updateSize(256);
+        this._oceanGeometry.initializeMeshes();
+
+        new OceanGUI(useProceduralSky, scene, engine, this._parameterRead.bind(this), this._parameterChanged.bind(this));
+
+        scene.onBeforeRenderObservable.add(() => {
+            this._skybox.update(this._light);
+            this._oceanGeometry.update();
+            this._wavesGenerator!.update();
+            this._buoyancy.setWaterHeightMap(this._wavesGenerator!.waterHeightMap, this._wavesGenerator!.waterHeightMapScale);
+            this._buoyancy.update();
+        });
+
+        return scene;
+    }
+
+    private _setCameraKeys(): void {
+        const kbInputs = this._camera.inputs.attached.keyboard as BABYLON.FreeCameraKeyboardMoveInput;
+        if (this._useZQSD) {
+            kbInputs.keysDown = [83];
+            kbInputs.keysLeft = [81];
+            kbInputs.keysRight = [68];
+            kbInputs.keysUp = [90];
+        } else {
+            kbInputs.keysDown = [83];
+            kbInputs.keysLeft = [65];
+            kbInputs.keysRight = [68];
+            kbInputs.keysUp = [87];
+        }
+        kbInputs.keysDownward = [32];
+        kbInputs.keysUpward = [69];
+    }
+
+    private _checkSupport(): boolean {
+        if (this._engine.getCaps().supportComputeShaders) {
+            return true;
+        }
+
+        const panel = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        const textNOk = "**Use WebGPU to watch this demo which requires compute shaders support. To enable WebGPU please use Edge Canary or Chrome canary. Also select the WebGPU engine from the top right drop down menu.**";
+    
+        var info = new GUI.TextBlock();
+        info.text = textNOk;
+        info.width = "100%";
+        info.paddingLeft = "5px";
+        info.paddingRight = "5px";
+        info.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+        info.textVerticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+        info.color = "red";
+        info.fontSize = "24px";
+        info.fontStyle = "bold";
+        info.textWrapping = true;
+        panel.addControl(info); 
+
+        return false;
+    }
+
+    private async _loadMeshes() {
         // Buoy
-        await BABYLON.SceneLoader.AppendAsync("", buoy, scene, undefined, ".glb");
+        await BABYLON.SceneLoader.AppendAsync("", buoy, this._scene, undefined, ".glb");
 
-        const buoyMesh = scene.getMeshByName("pTorus5_lambert1_0")!;
+        const buoyMesh = this._scene.getMeshByName("pTorus5_lambert1_0")!;
 
         buoyMesh.scaling.setAll(0.1);
         buoyMesh.position.y = -0.3;
         buoyMesh.position.z = -15;
         this._depthRenderer.getDepthMap().renderList!.push(buoyMesh);
-        buoyancy.addMesh(buoyMesh, { v1: new BABYLON.Vector3(0, 5, -6), v2: new BABYLON.Vector3(0, 5, 6), v3: new BABYLON.Vector3(5, 5, -6) }, -0.3, 1);
+        this._buoyancy.addMesh(buoyMesh, { v1: new BABYLON.Vector3(0, 5, -6), v2: new BABYLON.Vector3(0, 5, 6), v3: new BABYLON.Vector3(5, 5, -6) }, -0.3, 1);
 
         // Fisher boat
-        await BABYLON.SceneLoader.AppendAsync("", fisher_boat, scene, undefined, ".glb");
+        await BABYLON.SceneLoader.AppendAsync("", fisher_boat, this._scene, undefined, ".glb");
 
-        const fisherBoat = scene.getTransformNodeByName("Cube.022")!;
+        const fisherBoat = this._scene.getTransformNodeByName("Cube.022")!;
 
         fisherBoat.scaling.setAll(3);
         fisherBoat.position.x = -5;
         fisherBoat.position.y = 1.5;
         fisherBoat.position.z = -10;
         this._depthRenderer.getDepthMap().renderList!.push(...fisherBoat.getChildMeshes(false));
-        buoyancy.addMesh(fisherBoat, { v1: new BABYLON.Vector3(0, 2, 0), v2: new BABYLON.Vector3(0, -1.2, 0), v3: new BABYLON.Vector3(0.4, 2, 0) }, 1.5, 0);
+        this._buoyancy.addMesh(fisherBoat, { v1: new BABYLON.Vector3(0, 2, 0), v2: new BABYLON.Vector3(0, -1.2, 0), v3: new BABYLON.Vector3(0.4, 2, 0) }, 1.5, 0);
 
         // Dart tsunami buoy
-        await BABYLON.SceneLoader.AppendAsync("", dart_tsunami_buoy, scene, undefined, ".glb");
+        await BABYLON.SceneLoader.AppendAsync("", dart_tsunami_buoy, this._scene, undefined, ".glb");
 
-        const dartTsunamiBuoy = scene.getMeshByName("tsunami_buoy_tsunami_buoy_0")! as BABYLON.Mesh;
+        const dartTsunamiBuoy = this._scene.getMeshByName("tsunami_buoy_tsunami_buoy_0")! as BABYLON.Mesh;
 
         dartTsunamiBuoy.scaling.setAll(0.07/4);
         dartTsunamiBuoy.bakeCurrentTransformIntoVertices();
@@ -105,50 +205,150 @@ export class Ocean implements CreateSceneClass {
         dartTsunamiBuoy.alwaysSelectAsActiveMesh = true;
 
         this._depthRenderer.getDepthMap().renderList!.push(dartTsunamiBuoy);
-        buoyancy.addMesh(dartTsunamiBuoy, { v1: new BABYLON.Vector3(0.7, 1, -1.5), v2: new BABYLON.Vector3(0.7, 1, 1.5), v3: new BABYLON.Vector3(-1.5, 1, -1.5) }, -0.5, 2);
+        this._buoyancy.addMesh(dartTsunamiBuoy, { v1: new BABYLON.Vector3(0.7, 1, -1.5), v2: new BABYLON.Vector3(0.7, 1, 1.5), v3: new BABYLON.Vector3(-1.5, 1, -1.5) }, -0.5, 2);
 
-        /*const sp1 = BABYLON.MeshBuilder.CreateSphere("sp1", { diameter: 1.2 }, scene);
+        /*const sp1 = BABYLON.MeshBuilder.CreateSphere("sp1", { diameter: 1.2 }, this._scene);
         sp1.parent = dartTsunamiBuoy;
         sp1.position.x = 0.7;
         sp1.position.y = 1;
         sp1.position.z = -1.5;
 
-        const sp2 = BABYLON.MeshBuilder.CreateSphere("sp2", { diameter: 1.2 }, scene);
+        const sp2 = BABYLON.MeshBuilder.CreateSphere("sp2", { diameter: 1.2 }, this._scene);
         sp2.parent = dartTsunamiBuoy;
         sp2.position.x = 0.7;
         sp2.position.y = 1;
         sp2.position.z = 1.5;
 
-        const sp3 = BABYLON.MeshBuilder.CreateSphere("sp3", { diameter: 1.2 }, scene);
+        const sp3 = BABYLON.MeshBuilder.CreateSphere("sp3", { diameter: 1.2 }, this._scene);
         sp3.parent = dartTsunamiBuoy;
         sp3.position.x = -1.5;
         sp3.position.y = 1;
         sp3.position.z = -1.5;*/
+    }
 
-        scene.stopAllAnimations();
+    private async _updateSize(size: number) {
+        this._size = size;
+
+        this._buoyancy.size = size;
 
         const noise = await (await fetch(noiseEXR)).arrayBuffer();
 
-        const wavesGenerator = new WavesGenerator(size, scene, this._rttDebug, noise);
+        this._wavesGenerator?.dispose();
+        this._wavesGenerator = new WavesGenerator(this._size, this._wavesSettings, this._scene, this._rttDebug, noise);
 
-        const oceanMaterial = new OceanMaterial(wavesGenerator, this._depthRenderer, scene);
+        this._oceanMaterial.setWavesGenerator(this._wavesGenerator);
 
-        const oceanGeometry = new OceanGeometry(oceanMaterial, this._camera, scene);
+        await this._oceanGeometry.initializeMaterials();
+    }
 
-        await oceanGeometry.initialize();
+    private _readValue(obj: any, name: string): any {
+        const parts: string[] = name.split("_");
 
-        const pp = new BABYLON.FxaaPostProcess("fxaa", 1, this._camera);
-        pp.samples = engine.getCaps().maxMSAASamples;
+        for (let i = 0; i < parts.length; ++i) {
+            obj = obj[parts[i]];
+        }
 
-        scene.onBeforeRenderObservable.add(() => {
-            skybox.update(this._light);
-            oceanGeometry.update();
-            wavesGenerator.update();
-            buoyancy.setWaterHeightMap(wavesGenerator.waterHeightMap, wavesGenerator.waterHeightMapScale);
-            buoyancy.update();
-        });
+        return obj;
+    }
 
-        return scene;
+    private _setValue(obj: any, name: string, value: any): void {
+        const parts: string[] = name.split("_");
+
+        for (let i = 0; i < parts.length - 1; ++i) {
+            obj = obj[parts[i]];
+        }
+
+        obj[parts[parts.length - 1]] = value;
+    }
+
+    private _parameterRead(name: string): any {
+        switch (name) {
+            case "size":
+                return this._size;
+            case "showDebugRTT":
+                return this._rttDebug.isVisible;
+            case "envIntensity":
+                return this._scene.environmentIntensity;
+            case "lightIntensity":
+                return this._light.intensity;
+            case "enableFXAA":
+                return this._fxaa !== null;
+            case "useZQSD":
+                return this._useZQSD;
+            case "buoy_enabled":
+                return this._buoyancy.enabled;
+            case "buoy_attenuation":
+                return this._buoyancy.attenuation;
+            case "buoy_numSteps":
+                return this._buoyancy.numSteps;
+        }
+
+        if (name.startsWith("procSky_")) {
+            name = name.substring(8);
+            return (this._skybox.skyMaterial as any)[name];
+        }
+
+        if (name.startsWith("waves_")) {
+            name = name.substring(6);
+            return this._readValue(this._wavesSettings, name);
+        }
+    }
+
+    private _parameterChanged(name: string, value: any): void {
+        //console.log(name, "=", value);
+        switch (name) {
+            case "size":
+                const newSize = value | 0;
+                if (newSize !== this._size) {
+                    this._updateSize(newSize);
+                }
+                break;
+            case "showDebugRTT":
+                this._rttDebug.show(!!value);
+                break;
+            case "envIntensity":
+                this._scene.environmentIntensity = parseFloat(value);
+                break;
+            case "lightIntensity":
+                this._light.intensity = parseFloat(value);
+                break;
+            case "enableFXAA":
+                if (!!value) {
+                    if (!this._fxaa) {
+                        this._fxaa = new BABYLON.FxaaPostProcess("fxaa", 1, this._camera);
+                        this._fxaa.samples = this._engine.getCaps().maxMSAASamples;
+                    }
+                } else if (this._fxaa) {
+                    this._fxaa.dispose();
+                    this._fxaa = null;
+                }
+                break;
+            case "useZQSD":
+                this._useZQSD = !!value;
+                this._setCameraKeys();
+                break;
+            case "buoy_enabled":
+                this._buoyancy.enabled = !!value;
+                break;
+            case "buoy_attenuation":
+                this._buoyancy.attenuation = parseFloat(value);
+                break;
+            case "buoy_numSteps":
+                this._buoyancy.numSteps = value | 0;
+                break;
+        }
+
+        if (name.startsWith("procSky_")) {
+            name = name.substring(8);
+            (this._skybox.skyMaterial as any)[name] = parseFloat(value);
+            this._skybox.setAsDirty();
+        }
+
+        if (name.startsWith("waves_")) {
+            name = name.substring(6);
+            this._setValue(this._wavesSettings, name, parseFloat(value));
+            this._wavesGenerator!.initializeCascades();
+        }
     }
 }
 

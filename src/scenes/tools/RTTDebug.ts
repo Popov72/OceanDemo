@@ -33,6 +33,10 @@ export class RTTDebug {
         this._guiTexts[index].text = name;
     }
 
+    public get isVisible() {
+        return this._gui.layer!.isEnabled;
+    }
+
     public show(show: boolean): void {
         for (const plane of this._debugPlaneList) {
             plane.setEnabled(show);

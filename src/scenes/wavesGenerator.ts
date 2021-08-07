@@ -5,17 +5,16 @@ import { WavesCascade } from "./wavesCascade";
 import { WavesSettings } from "./wavesSettings";
 
 export class WavesGenerator {
-    public wavesSettings: WavesSettings;
     public lengthScale: number[];
 
     private _engine: BABYLON.Engine;
     private _startTime: number;
-    private _size: number;
     private _rttDebug: RTTDebug;
     private _fft: FFT;
     private _noise: BABYLON.Texture;
     private _cascades: WavesCascade[];
     private _displacementMap: BABYLON.Nullable<Uint16Array>;
+    private _wavesSettings: WavesSettings;
 
     public getCascade(num: number) {
         return this._cascades[num];
@@ -29,12 +28,12 @@ export class WavesGenerator {
         return this.lengthScale[0];
     }
 
-    constructor(size: number, scene: BABYLON.Scene, rttDebug: RTTDebug, noise: BABYLON.Nullable<ArrayBuffer>) {
+    constructor(size: number, wavesSettings: WavesSettings, scene: BABYLON.Scene, rttDebug: RTTDebug, noise: BABYLON.Nullable<ArrayBuffer>) {
         this._engine = scene.getEngine();
-        this._size = size;
         this._rttDebug = rttDebug;
         this._startTime = new Date().getTime() / 1000;
         this._displacementMap = null;
+        this._wavesSettings = wavesSettings;
 
         this._fft = new FFT(scene.getEngine(), scene, this._rttDebug, 1, size);
         this._noise = this._generateNoiseTexture(size, noise);
@@ -42,7 +41,6 @@ export class WavesGenerator {
         this._rttDebug.setTexture(0, "noise", this._noise);
 
         this.lengthScale = [250, 17, 5];
-        this.wavesSettings = new WavesSettings();
 
         this._cascades = [
             new WavesCascade(size, this._noise, this._fft, this._rttDebug, 2, this._engine),
@@ -57,7 +55,7 @@ export class WavesGenerator {
         let boundary1 = 0.0001;
         for (let i = 0; i < this.lengthScale.length; ++i) {
             let boundary2 = i < this.lengthScale.length - 1 ?  2 * Math.PI / this.lengthScale[i + 1] * 6 : 9999;
-            this._cascades[i].calculateInitials(this.wavesSettings, this.lengthScale[i], boundary1, boundary2);
+            this._cascades[i].calculateInitials(this._wavesSettings, this.lengthScale[i], boundary1, boundary2);
             boundary1 = boundary2;
         }
     }

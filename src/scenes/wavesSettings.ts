@@ -28,7 +28,7 @@ interface SpectrumSettings {
 export class WavesSettings {
 
     public g = 9.81;
-    public depth = 500;
+    public depth = 3;
 
     //[Range(0, 1)]
     public lambda = 1;

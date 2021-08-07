@@ -49,12 +49,28 @@ export class OceanGeometry {
         ];
     }
 
-    public async initialize() {
+    public async initializeMaterials() {
+        this._materials[0]?.dispose();
+        this._materials[1]?.dispose();
+        this._materials[2]?.dispose();
+
         this._materials = [
             await this._oceanMaterial.getMaterial(true, true),
             await this._oceanMaterial.getMaterial(true, false),
             await this._oceanMaterial.getMaterial(false, false),
         ];
+    }
+
+    public async initializeMeshes() {
+        this._center?.dispose();
+        this._skirt?.dispose();
+        this._rings?.forEach((m) => m.dispose());
+        this._trims?.forEach((m) => m.dispose());
+
+        this._skirt = null as any;
+
+        this._rings = [];
+        this._trims = [];
 
         this._instantiateMeshes();
     }
