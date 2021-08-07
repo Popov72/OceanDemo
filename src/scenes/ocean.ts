@@ -20,8 +20,6 @@ import buoy from "../../assets/ocean/buoy.glb";
 import fisher_boat from "../../assets/ocean/fisher_boat.glb";
 import dart_tsunami_buoy from "../../assets/ocean/dart_tsunami_buoy.glb";
 
-const useProceduralSky = true;
-
 export class Ocean implements CreateSceneClass {
 
     private _engine: BABYLON.Engine;
@@ -34,11 +32,14 @@ export class Ocean implements CreateSceneClass {
     private _wavesSettings: WavesSettings;
     private _fxaa: BABYLON.Nullable<BABYLON.FxaaPostProcess>;
     private _size: number;
+    private _gui: OceanGUI;
     private _skybox: SkyBox;
     private _oceanMaterial: OceanMaterial;
     private _oceanGeometry: OceanGeometry;
     private _wavesGenerator: BABYLON.Nullable<WavesGenerator>;
     private _useZQSD: boolean;
+    private _useProceduralSky: boolean
+    private _lightDirection: BABYLON.Vector3;
 
     constructor() {
         this._engine = null as any;
@@ -49,11 +50,14 @@ export class Ocean implements CreateSceneClass {
         this._depthRenderer = null as any;
         this._buoyancy = null as any;
         this._fxaa = null;
+        this._gui = null as any;
         this._skybox = null as any;
         this._oceanMaterial = null as any;
         this._oceanGeometry = null as any;
         this._wavesGenerator = null;
         this._useZQSD = false;
+        this._useProceduralSky = true;
+        this._lightDirection = new BABYLON.Vector3(0, -1, -0.25);
 
         this._size = 0;
         this._wavesSettings = new WavesSettings();
@@ -96,11 +100,11 @@ export class Ocean implements CreateSceneClass {
         this._depthRenderer = this._scene.enableDepthRenderer(this._camera, false);
         this._depthRenderer.getDepthMap().renderList = [];
         
-        this._light = new BABYLON.DirectionalLight("light", new BABYLON.Vector3(0, -1, -0.25), scene);
+        this._light = new BABYLON.DirectionalLight("light", this._lightDirection, scene);
         this._light.intensity = 1;
-        this._light.diffuse = new BABYLON.Color3(1, 0.95686275, 0.8392157);
+        this._light.diffuse = new BABYLON.Color3(1, 1, 1);
 
-        this._skybox = new SkyBox(useProceduralSky, scene);
+        this._skybox = new SkyBox(this._useProceduralSky, scene);
         this._buoyancy = new Buoyancy(this._size, 3, 0.2);
         this._oceanMaterial = new OceanMaterial(this._depthRenderer, this._scene);
         this._oceanGeometry = new OceanGeometry(this._oceanMaterial, this._camera, this._scene);
@@ -115,7 +119,11 @@ export class Ocean implements CreateSceneClass {
         await this._updateSize(256);
         this._oceanGeometry.initializeMeshes();
 
-        new OceanGUI(useProceduralSky, scene, engine, this._parameterRead.bind(this), this._parameterChanged.bind(this));
+        this._gui = new OceanGUI(this._useProceduralSky, scene, engine, this._parameterRead.bind(this), this._parameterChanged.bind(this));
+
+        if (location.href.indexOf("hidegui") !== -1) {
+            this._gui.visible = false;
+        }
 
         scene.onBeforeRenderObservable.add(() => {
             this._skybox.update(this._light);
@@ -271,6 +279,8 @@ export class Ocean implements CreateSceneClass {
                 return this._scene.environmentIntensity;
             case "lightIntensity":
                 return this._light.intensity;
+            case "proceduralSky":
+                return this._useProceduralSky;
             case "enableFXAA":
                 return this._fxaa !== null;
             case "useZQSD":
@@ -281,6 +291,14 @@ export class Ocean implements CreateSceneClass {
                 return this._buoyancy.attenuation;
             case "buoy_numSteps":
                 return this._buoyancy.numSteps;
+            case "skybox_lightColor":
+                return this._light.diffuse.toHexString();
+            case "skybox_directionX":
+                return this._lightDirection.x;
+            case "skybox_directionY":
+                return this._lightDirection.y;
+            case "skybox_directionZ":
+                return this._lightDirection.z;
         }
 
         if (name.startsWith("procSky_")) {
@@ -291,6 +309,11 @@ export class Ocean implements CreateSceneClass {
         if (name.startsWith("waves_")) {
             name = name.substring(6);
             return this._readValue(this._wavesSettings, name);
+        }
+
+        if (name.startsWith("oceangeom_")) {
+            name = name.substring(10);
+            return this._readValue(this._oceanGeometry, name);
         }
     }
 
@@ -323,6 +346,16 @@ export class Ocean implements CreateSceneClass {
                     this._fxaa = null;
                 }
                 break;
+            case "proceduralSky":
+                value = !!value;
+                if (this._useProceduralSky !== value) {
+                    this._gui.dispose();
+                    this._skybox.dispose();
+                    this._useProceduralSky = value;
+                    this._skybox = new SkyBox(this._useProceduralSky, this._scene);
+                    this._gui = new OceanGUI(this._useProceduralSky, this._scene, this._engine, this._parameterRead.bind(this), this._parameterChanged.bind(this));
+                }
+                break;
             case "useZQSD":
                 this._useZQSD = !!value;
                 this._setCameraKeys();
@@ -336,18 +369,41 @@ export class Ocean implements CreateSceneClass {
             case "buoy_numSteps":
                 this._buoyancy.numSteps = value | 0;
                 break;
+            case "skybox_lightColor":
+                this._light.diffuse.copyFrom(BABYLON.Color3.FromHexString(value));
+                break;
+            case "skybox_directionX":
+                this._lightDirection.x = parseFloat(value);
+                this._light.direction = this._lightDirection.normalizeToNew();
+                break;
+            case "skybox_directionY":
+                this._lightDirection.y = parseFloat(value);
+                this._light.direction = this._lightDirection.normalizeToNew();
+                break;
+            case "skybox_directionZ":
+                this._lightDirection.z = parseFloat(value);
+                this._light.direction = this._lightDirection.normalizeToNew();
+                break;
         }
 
         if (name.startsWith("procSky_")) {
             name = name.substring(8);
-            (this._skybox.skyMaterial as any)[name] = parseFloat(value);
+            this._setValue(this._skybox.skyMaterial, name, value === false ? false : value === true ? true : parseFloat(value));
             this._skybox.setAsDirty();
         }
 
         if (name.startsWith("waves_")) {
             name = name.substring(6);
-            this._setValue(this._wavesSettings, name, parseFloat(value));
+            this._setValue(this._wavesSettings, name, value === false ? false : value === true ? true : parseFloat(value));
             this._wavesGenerator!.initializeCascades();
+        }
+
+        if (name.startsWith("oceangeom_")) {
+            name = name.substring(10);
+            this._setValue(this._oceanGeometry, name, value === false ? false : value === true ? true : parseFloat(value));
+            if (name !== "oceangeom_noMaterialLod") {
+                this._oceanGeometry.initializeMeshes();
+            }
         }
     }
 }

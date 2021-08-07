@@ -15,8 +15,8 @@ export class OceanGeometry {
     public lengthScale = 15; // float
     public vertexDensity = 30; // 1-40 int
     public clipLevels = 8; // 0-8 int
-    public skirtSize = 55.4; // 0-100 float
-    public noMaterialLod = true
+    public skirtSize = 10; // 0-100 float
+    public noMaterialLod = true;
     public useSkirt = true;
 
     private _scene: BABYLON.Scene;
@@ -49,7 +49,20 @@ export class OceanGeometry {
         ];
     }
 
-    public async initializeMaterials() {
+    public get wireframe() {
+        return this._center.material!.wireframe;
+    }
+
+    public set wireframe(w: boolean) {
+        this._center.material!.wireframe = w;
+        if (this._skirt) {
+            this._skirt.material!.wireframe = w;
+        }
+        this._rings.forEach((m) => m.material!.wireframe = w);
+        this._trims.forEach((m) => m.material!.wireframe = w);
+    }
+
+    public async initializeMaterials(): Promise<void> {
         this._materials[0]?.dispose();
         this._materials[1]?.dispose();
         this._materials[2]?.dispose();
@@ -61,7 +74,7 @@ export class OceanGeometry {
         ];
     }
 
-    public async initializeMeshes() {
+    public initializeMeshes(): void {
         this._center?.dispose();
         this._skirt?.dispose();
         this._rings?.forEach((m) => m.dispose());

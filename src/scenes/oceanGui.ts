@@ -9,14 +9,24 @@ export class OceanGUI {
     private _scene: BABYLON.Scene;
     private _paramRead: (name: string) => any;
     private _paramChanged: (name: string, value: any) => void;
+    private _onKeyObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.KeyboardInfo>>;
 
     public static LoadDAT(): Promise<void> {
         return BABYLON.Tools.LoadScriptAsync("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js");
     }
 
+    public set visible(v: boolean) {
+        if (v === this._visible) {
+            return;
+        }
+        this._visible = v;
+        this._gui.domElement.style.display = v ? "" : "none";
+    }
+
     constructor(hasProceduralSky: boolean, scene: BABYLON.Scene, engine: BABYLON.Engine, paramRead: (name: string) => any, paramChanged: (name: string, value: any) => void) {
         this._scene = scene;
         this._visible = true;
+        this._onKeyObserver = null;
         this._paramRead = paramRead;
         this._paramChanged = paramChanged;
 
@@ -33,8 +43,16 @@ export class OceanGUI {
         this._initialize(hasProceduralSky);
     }
 
+    public dispose() {
+        const oldgui = document.getElementById("datGUI");
+        if (oldgui !== null) {
+            oldgui.remove();
+        }
+        this._scene.onKeyboardObservable.remove(this._onKeyObserver);
+    }
+
     private _setupKeyboard(): void {
-        this._scene.onKeyboardObservable.add((kbInfo) => {
+        this._onKeyObserver = this._scene.onKeyboardObservable.add((kbInfo) => {
             switch (kbInfo.type) {
                 case BABYLON.KeyboardEventTypes.KEYDOWN:
                     //console.log("KEY DOWN: ", kbInfo.event.key);
@@ -42,12 +60,11 @@ export class OceanGUI {
                 case BABYLON.KeyboardEventTypes.KEYUP:
                     switch (kbInfo.event.key) {
                         case "F8": {
-                            this._visible = !this._visible;
-                            this._gui.domElement.style.display = this._visible ? "" : "none";
+                            this.visible = !this._visible;
                             break;
                         }
                     }
-                    console.log("KEY UP: ", kbInfo.event.key, kbInfo.event.keyCode);
+                    //console.log("KEY UP: ", kbInfo.event.key, kbInfo.event.keyCode);
                     break;
             }
         });
@@ -58,11 +75,12 @@ export class OceanGUI {
 
         if (hasProceduralSky) {
             this._makeMenuProceduralSky();
+        } else {
+            this._makeMenuSkybox();
         }
-
+ 
         this._makeMenuWavesGenerator();
-
-        const geometry = this._gui.addFolder("Ocean Geometry");
+        this._makeMenuOceanGeometry()
 
         const shader = this._gui.addFolder("Ocean Shader");
 
@@ -93,11 +111,20 @@ export class OceanGUI {
             });
     }
 
+    private _addColor(menu: any, params: any, name: string, friendlyName: string): void {
+        menu.addColor(params, name)
+            .name(friendlyName)
+            .onChange((value: any) => {
+                this._paramChanged(name, value);
+            });
+    }
+
     private _makeMenuGeneral(): void {
         const params = {
             size: this._paramRead("size"),
             envIntensity: this._paramRead("envIntensity"),
             lightIntensity: this._paramRead("lightIntensity"),
+            proceduralSky: this._paramRead("proceduralSky"),
             enableFXAA: this._paramRead("enableFXAA"),
             useZQSD: this._paramRead("useZQSD"),
             showDebugRTT: this._paramRead("showDebugRTT"),
@@ -108,6 +135,7 @@ export class OceanGUI {
         this._addList(general, params, "size", "Resolution", [256, 128, 64, 32]);
         this._addSlider(general, params, "envIntensity", "Env intensity", 0, 4, 0.05);
         this._addSlider(general, params, "lightIntensity", "Light intensity", 0, 5, 0.05);
+        this._addCheckbox(general, params, "proceduralSky", "Procedural sky");
         this._addCheckbox(general, params, "enableFXAA", "Enable FXAA");
         this._addCheckbox(general, params, "useZQSD", "Use ZQSD");
         this._addCheckbox(general, params, "showDebugRTT", "Show debug RTT");
@@ -126,7 +154,7 @@ export class OceanGUI {
             procSky_mieDirectionalG: this._paramRead("procSky_mieDirectionalG"),
         };
         
-        const proceduralSky = this._gui.addFolder("Procedural Sky");
+        const proceduralSky = this._gui.addFolder("Sky");
 
         this._addSlider(proceduralSky, params, "procSky_inclination", "Inclination", -0.5, 0.5, 0.001);
         this._addSlider(proceduralSky, params, "procSky_azimuth", "Azimuth", 0.0, 1, 0.001);
@@ -135,6 +163,22 @@ export class OceanGUI {
         this._addSlider(proceduralSky, params, "procSky_rayleigh", "Rayleigh", 0.1, 10, 0.1);
         this._addSlider(proceduralSky, params, "procSky_mieCoefficient", "Mie Coefficient", 0.0, 0.1, 0.0001);
         this._addSlider(proceduralSky, params, "procSky_mieDirectionalG", "Mie DirectionalG", 0.0, 1, 0.01);
+    }
+
+    private _makeMenuSkybox(): void {
+        const params = {
+            skybox_lightColor: this._paramRead("skybox_lightColor"),
+            skybox_directionX: this._paramRead("skybox_directionX"),
+            skybox_directionY: this._paramRead("skybox_directionY"),
+            skybox_directionZ: this._paramRead("skybox_directionZ"),
+        };
+        
+        const skybox = this._gui.addFolder("Sky");
+
+        this._addColor(skybox, params, "skybox_lightColor", "Light color");
+        this._addSlider(skybox, params, "skybox_directionX", "Light dir X", -10, 10, 0.001);
+        this._addSlider(skybox, params, "skybox_directionY", "Light dir Y", -10, -0.01, 0.001);
+        this._addSlider(skybox, params, "skybox_directionZ", "Light dir Z", -10, 10, 0.001);
     }
 
     private _makeMenuWavesGenerator(): void {
@@ -197,6 +241,26 @@ export class OceanGUI {
         wavesGenerator.open();
     }
 
+    private _makeMenuOceanGeometry(): void {
+        const params = {
+            oceangeom_lengthScale: this._paramRead("oceangeom_lengthScale"),
+            oceangeom_vertexDensity: this._paramRead("oceangeom_vertexDensity"),
+            oceangeom_clipLevels: this._paramRead("oceangeom_clipLevels"),
+            oceangeom_skirtSize: this._paramRead("oceangeom_skirtSize"),
+            oceangeom_wireframe: this._paramRead("oceangeom_wireframe"),
+            oceangeom_noMaterialLod: this._paramRead("oceangeom_noMaterialLod"),
+        };
+        
+        const oceanGeometry = this._gui.addFolder("Ocean Geometry");
+
+        this._addSlider(oceanGeometry, params, "oceangeom_lengthScale", "Length scale", 1, 100, 0.1);
+        this._addSlider(oceanGeometry, params, "oceangeom_vertexDensity", "Vertex density", 1, 40, 1);
+        this._addSlider(oceanGeometry, params, "oceangeom_clipLevels", "Clip levels", 1, 8, 1);
+        this._addSlider(oceanGeometry, params, "oceangeom_skirtSize", "Skirt size", 0, 100, 0.1);
+        this._addCheckbox(oceanGeometry, params, "oceangeom_wireframe", "Wireframe");
+        this._addCheckbox(oceanGeometry, params, "oceangeom_noMaterialLod", "No material LOD");
+    }
+
     private _makeMenuBuoyancy(): void {
         const params = {
             buoy_enabled: this._paramRead("buoy_enabled"),
@@ -207,7 +271,7 @@ export class OceanGUI {
         const buoyancy = this._gui.addFolder("Buoyancy");
 
         this._addCheckbox(buoyancy, params, "buoy_enabled", "Enabled");
-        this._addSlider(buoyancy, params, "buoy_attenuation", "Dampen factor", 0, 1, 0.001);
+        this._addSlider(buoyancy, params, "buoy_attenuation", "Damping factor", 0, 1, 0.001);
         this._addSlider(buoyancy, params, "buoy_numSteps", "Num steps", 1, 20, 1);
     }
 }

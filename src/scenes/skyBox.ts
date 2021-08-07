@@ -13,6 +13,7 @@ export class SkyBox {
     private _skyMaterial: SkyMaterial;
     private _probe: BABYLON.ReflectionProbe;
     private _oldSunPosition: BABYLON.Vector3;
+    private _skyboxObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.Scene>>;
     private _dirty: boolean;
 
     public get probe(): BABYLON.Nullable<BABYLON.ReflectionProbe> {
@@ -37,7 +38,11 @@ export class SkyBox {
 
         this._skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size: 1000.0, sideOrientation: BABYLON.Mesh.BACKSIDE}, this._scene);
 
-        scene.onBeforeRenderObservable.add(() => {
+        // put the skybox first in the list
+        scene.meshes.splice(scene.meshes.indexOf(this._skybox), 1);
+        scene.meshes.splice(0, 0, this._skybox);
+
+        this._skyboxObserver = scene.onBeforeRenderObservable.add(() => {
             this._skybox.position = scene.activeCameras?.[0].position ?? scene.activeCamera!.position;
         });
 
@@ -62,6 +67,22 @@ export class SkyBox {
         light.diffuse = (this._skyMaterial as any).getSunColor();
     }
 
+    public dispose(): void {
+        this._scene.onBeforeRenderObservable.remove(this._skyboxObserver);
+        this._scene.customRenderTargets = [];
+
+        if (this._procedural) {
+            this._probe.dispose();
+        } else {
+            this._scene.environmentTexture?.dispose();
+            (this._skybox.material as BABYLON.StandardMaterial).reflectionTexture?.dispose();
+        }
+
+        this._skybox.material!.dispose();
+        this._skybox.dispose();
+        this._scene.environmentTexture = null;
+    }
+
     private _initProceduralSkybox(): void {
         this._skyMaterial = new SkyMaterial('sky', this._scene);
         this._skybox.material = this._skyMaterial;
@@ -70,8 +91,6 @@ export class SkyBox {
         this._skyMaterial.azimuth = 0.307;
         this._skyMaterial.inclination = 0.0;
     
-        (window as any).ss = this._skyMaterial;
-
         // Reflection probe
         this._probe = new BABYLON.ReflectionProbe('skyProbe', 128, this._scene, true, true, true);
         this._probe.renderList!.push(this._skybox);
@@ -94,14 +113,15 @@ export class SkyBox {
 
     private _initSkybox(): void {
         //const reflectionTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("https://assets.babylonjs.com/environments/environmentSpecular.env", scene);
-        const reflectionTexture = new BABYLON.HDRCubeTexture(qwantani_1k, this._scene, 512, false, true, false, true);
+        const reflectionTexture = new BABYLON.HDRCubeTexture(qwantani_1k, this._scene, 256, false, true, false, true);
 
         const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this._scene);
-        skyboxMaterial.backFaceCulling = false;
+        skyboxMaterial.disableDepthWrite = true;
         skyboxMaterial.reflectionTexture = reflectionTexture.clone();
         skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
         skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
         skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+
         this._skybox.material = skyboxMaterial;
 
         this._scene.environmentTexture = reflectionTexture;
