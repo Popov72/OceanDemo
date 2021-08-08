@@ -1,3 +1,4 @@
+import { Engine } from "@babylonjs/core/Engines/engine";
 import { WebGPUEngine } from "@babylonjs/core/Engines/webgpuEngine";
 import { getSceneModuleWithName } from "./createScene";
 
@@ -17,19 +18,25 @@ export const babylonInit = async (): Promise<void>  => {
     // Generate the BABYLON 3D engine
     //const engine = new Engine(canvas, true); 
 
-    const engine = new WebGPUEngine(canvas, {
-        deviceDescriptor: {
-            requiredFeatures: [
-                "texture-compression-bc",
-                "timestamp-query",
-                "pipeline-statistics-query",
-                "depth-clamping",
-                "depth24unorm-stencil8",
-                "depth32float-stencil8",
-            ],
-        },
-    });
-    await engine.initAsync();
+    let engine: Engine;
+
+    if (WebGPUEngine.IsSupported) {
+        engine = new WebGPUEngine(canvas, {
+            deviceDescriptor: {
+                requiredFeatures: [
+                    "texture-compression-bc",
+                    "timestamp-query",
+                    "pipeline-statistics-query",
+                    "depth-clamping",
+                    "depth24unorm-stencil8",
+                    "depth32float-stencil8",
+                ],
+            },
+        });
+        await (engine as WebGPUEngine).initAsync();
+    } else {
+        engine = new Engine(canvas, true);
+    }
 
     // Create the scene
     const scene = await createSceneModule.createScene(engine, canvas);
