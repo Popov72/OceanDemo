@@ -26,6 +26,43 @@ export class OceanMaterial {
         this._wavesGenerator = wavesGenerator;
     }
 
+    public readMaterialParameter(mat: PBRCustomMaterial, name: string): any {
+        const tmp = new BABYLON.Color3();
+        for (const param in mat._newUniformInstances) {
+            const [ptype, pname] = param.split('-');
+            let val = mat._newUniformInstances[param];
+            if (pname === name) {
+                if (ptype === "vec3") {
+                    // all vec3 types are color in the shader
+                    val = val as BABYLON.Vector3;
+                    tmp.copyFromFloats(val.x, val.y, val.z);
+                    tmp.toGammaSpaceToRef(tmp);
+                    val = tmp.toHexString();
+                }
+                return val;
+            }
+        }
+        return null;
+    }
+
+    public updateMaterialParameter(mat: PBRCustomMaterial, name: string, value: any): void {
+        const tmp = new BABYLON.Vector3();
+        for (const param in mat._newUniformInstances) {
+            const [ptype, pname] = param.split('-');
+            if (pname === name) {
+                if (ptype === "vec3") {
+                    // all vec3 types are color in the shader
+                    value = BABYLON.Color3.FromHexString(value);
+                    value = value.toLinearSpaceToRef(value);
+                    tmp.copyFromFloats(value.r, value.g, value.b);
+                    value = tmp;
+                }
+                mat._newUniformInstances[param] = value;
+                return;
+            }
+        }
+    }
+
     public async getMaterial(useMid: boolean, useClose: boolean, useNodeMaterial = false): Promise<BABYLON.Material> {
         let mat: BABYLON.NodeMaterial | PBRCustomMaterial;
 
@@ -40,31 +77,26 @@ export class OceanMaterial {
             //mat.realTimeFilteringQuality = BABYLON.Constants.TEXTURE_FILTERING_QUALITY_HIGH;
             //mat.wireframe = true;
 
-            const color = new BABYLON.Vector3(0.03457636, 0.12297464, 0.1981132);
-            /*if (useMid && useClose) {
-                color.y = color.z = 0;
-            } else if (useMid && !useClose) {
-                color.x = color.z = 0;
-            } else {
-                color.x = color.y = 0;
-            }*/
+            const color = new BABYLON.Vector3(0.011126082368383245, 0.05637409755197975, 0.09868919754109445);
 
-            mat.AddUniform("_LOD_scale", "float", 7.13);
-            mat.AddUniform("_FoamColor", "vec3", new BABYLON.Vector3(1, 1, 1));
-            mat.AddUniform("_SSSStrength", "float", 0.133);
             mat.AddUniform("_Color", "vec3", color);
-            mat.AddUniform("_SSSColor", "vec3", new BABYLON.Vector3(0.1541919, 0.8857628, 0.990566));
-            mat.AddUniform("_SSSBase", "float", -0.1);
-            mat.AddUniform("_SSSScale", "float", 4.8);
             mat.AddUniform("_MaxGloss", "float", 0.91);
             mat.AddUniform("_RoughnessScale", "float", 0.0044);
+            mat.AddUniform("_LOD_scale", "float", 7.13);
+
+            mat.AddUniform("_FoamColor", "vec3", new BABYLON.Vector3(1, 1, 1));
+            mat.AddUniform("_FoamScale", "float", 2.4);
+            mat.AddUniform("_ContactFoam", "float", 1);
             mat.AddUniform("_FoamBiasLOD0", "float", 0.84);
             mat.AddUniform("_FoamBiasLOD1", "float", 1.83);
             mat.AddUniform("_FoamBiasLOD2", "float", 2.72);
-            mat.AddUniform("_FoamScale", "float", 2.4);
-            mat.AddUniform("_ContactFoam", "float", 1);
-            mat.AddUniform("lightDirection", "vec3", "");
 
+            mat.AddUniform("_SSSColor", "vec3", new BABYLON.Vector3(0.1541919, 0.8857628, 0.990566));
+            mat.AddUniform("_SSSStrength", "float", 0.168);
+            mat.AddUniform("_SSSBase", "float", -1.31);
+            mat.AddUniform("_SSSScale", "float", 3.88);
+
+            mat.AddUniform("lightDirection", "vec3", "");
             mat.AddUniform("_WorldSpaceCameraPos", "vec3", "");
             mat.AddUniform("LengthScale0", "float", this._wavesGenerator.lengthScale[0]);
             mat.AddUniform("LengthScale1", "float", this._wavesGenerator.lengthScale[1]);

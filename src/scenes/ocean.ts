@@ -12,6 +12,7 @@ import { Buoyancy } from "./buoyancy";
 import { OceanGeometry } from "./oceanGeometry";
 import { OceanGUI } from "./oceanGui";
 import { WavesSettings } from "./wavesSettings";
+import { PBRCustomMaterial } from "@babylonjs/materials";
 
 import "@babylonjs/loaders";
 
@@ -330,6 +331,11 @@ export class Ocean implements CreateSceneClass {
             name = name.substring(10);
             return this._readValue(this._oceanGeometry, name);
         }
+
+        if (name.startsWith("oceanshader_")) {
+            name = name.substring(12);
+            return this._oceanMaterial.readMaterialParameter(this._oceanGeometry.getMaterial(0) as PBRCustomMaterial, name);
+        }
     }
 
     private _parameterChanged(name: string, value: any): void {
@@ -419,6 +425,13 @@ export class Ocean implements CreateSceneClass {
             if (name !== "oceangeom_noMaterialLod") {
                 this._oceanGeometry.initializeMeshes();
             }
+        }
+
+        if (name.startsWith("oceanshader_")) {
+            name = name.substring(12);
+            this._oceanMaterial.updateMaterialParameter(this._oceanGeometry.getMaterial(0) as PBRCustomMaterial, name, value);
+            this._oceanMaterial.updateMaterialParameter(this._oceanGeometry.getMaterial(1) as PBRCustomMaterial, name, value);
+            this._oceanMaterial.updateMaterialParameter(this._oceanGeometry.getMaterial(2) as PBRCustomMaterial, name, value);
         }
     }
 }

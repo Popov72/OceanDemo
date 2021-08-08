@@ -93,6 +93,10 @@ export class OceanGeometry {
         this._updateMaterials();
     }
 
+    public getMaterial(index: number): BABYLON.Material {
+        return this._materials[index];
+    }
+
     private _updateMaterials(): void {
         const activeLevels = this._activeLodLevels;
 

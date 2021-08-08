@@ -81,8 +81,7 @@ export class OceanGUI {
  
         this._makeMenuWavesGenerator();
         this._makeMenuOceanGeometry()
-
-        const shader = this._gui.addFolder("Ocean Shader");
+        this._makeMenuOceanShader();
 
         this._makeMenuBuoyancy();
     }
@@ -259,6 +258,38 @@ export class OceanGUI {
         this._addSlider(oceanGeometry, params, "oceangeom_skirtSize", "Skirt size", 0, 100, 0.1);
         this._addCheckbox(oceanGeometry, params, "oceangeom_wireframe", "Wireframe");
         this._addCheckbox(oceanGeometry, params, "oceangeom_noMaterialLod", "No material LOD");
+    }
+
+    private _makeMenuOceanShader(): void {
+        const params = {
+            oceanshader__Color: this._paramRead("oceanshader__Color"),
+            oceanshader__MaxGloss: this._paramRead("oceanshader__MaxGloss"),
+            oceanshader__RoughnessScale: this._paramRead("oceanshader__RoughnessScale"),
+            oceanshader__LOD_scale: this._paramRead("oceanshader__LOD_scale"),
+            oceanshader__FoamColor: this._paramRead("oceanshader__FoamColor"),
+            oceanshader__FoamScale: this._paramRead("oceanshader__FoamScale"),
+            oceanshader__ContactFoam: this._paramRead("oceanshader__ContactFoam"),
+            oceanshader__FoamBiasLOD2: this._paramRead("oceanshader__FoamBiasLOD2"),
+            oceanshader__SSSColor: this._paramRead("oceanshader__SSSColor"),
+            oceanshader__SSSStrength: this._paramRead("oceanshader__SSSStrength"),
+            oceanshader__SSSBase: this._paramRead("oceanshader__SSSBase"),
+            oceanshader__SSSScale: this._paramRead("oceanshader__SSSScale"),
+        };
+        
+        const oceanShader = this._gui.addFolder("Ocean Shader");
+
+        this._addColor(oceanShader, params, "oceanshader__Color", "Color");
+        this._addSlider(oceanShader, params, "oceanshader__MaxGloss", "Max gloss", 0.0, 1, 0.01);
+        this._addSlider(oceanShader, params, "oceanshader__RoughnessScale", "Roughness scale", 0.0, 1, 0.0001);
+        this._addSlider(oceanShader, params, "oceanshader__LOD_scale", "LOD scale", 0.01, 20, 0.01);
+        this._addColor(oceanShader, params, "oceanshader__FoamColor", "Foam color");
+        this._addSlider(oceanShader, params, "oceanshader__FoamScale", "Foam scale", 0.001, 8, 0.001);
+        this._addSlider(oceanShader, params, "oceanshader__ContactFoam", "Foam contact", 0.001, 3, 0.001);
+        this._addSlider(oceanShader, params, "oceanshader__FoamBiasLOD2", "Foam bias", 0.001, 4, 0.001);
+        this._addColor(oceanShader, params, "oceanshader__SSSColor", "SSS color");
+        this._addSlider(oceanShader, params, "oceanshader__SSSStrength", "SSS strength", 0.001, 2, 0.001);
+        this._addSlider(oceanShader, params, "oceanshader__SSSBase", "SSS base", -2, 1, 0.001);
+        this._addSlider(oceanShader, params, "oceanshader__SSSScale", "SSS scale", 0.001, 10, 0.001);
     }
 
     private _makeMenuBuoyancy(): void {
