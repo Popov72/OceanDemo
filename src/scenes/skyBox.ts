@@ -15,6 +15,7 @@ export class SkyBox {
     private _oldSunPosition: BABYLON.Vector3;
     private _skyboxObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.Scene>>;
     private _dirty: boolean;
+    private _dirtyCount: number;
 
     public get probe(): BABYLON.Nullable<BABYLON.ReflectionProbe> {
         return this._probe;
@@ -26,6 +27,8 @@ export class SkyBox {
 
     public setAsDirty(): void {
         this._dirty = true;
+        this._dirtyCount = 2;
+        this._probe.cubeTexture.refreshRate = 1;
     }
 
     constructor(useProcedural: boolean, scene: BABYLON.Scene) {
@@ -35,6 +38,7 @@ export class SkyBox {
         this._skyMaterial = null as any;
         this._probe = null as any;
         this._dirty = false;
+        this._dirtyCount = 0;
 
         this._skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size: 1000.0, sideOrientation: BABYLON.Mesh.BACKSIDE}, this._scene);
 
@@ -58,9 +62,11 @@ export class SkyBox {
             return;
         }
         if (!this._oldSunPosition.equals(this._skyMaterial.sunPosition) || this._dirty) {
-            this._dirty = false;
-            this._probe.cubeTexture.refreshRate = 0;
             this._oldSunPosition.copyFrom(this._skyMaterial.sunPosition);
+            if (this._dirtyCount-- === 0) {
+                this._dirty = false;
+                this._probe.cubeTexture.refreshRate = 0;
+            }
         }
         light.position = this._skyMaterial.sunPosition;
         light.direction = this._skyMaterial.sunPosition.negate().normalize();
