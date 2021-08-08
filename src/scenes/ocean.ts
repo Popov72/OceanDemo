@@ -125,6 +125,21 @@ export class Ocean implements CreateSceneClass {
             this._gui.visible = false;
         }
 
+        this._scene.onKeyboardObservable.add((kbInfo) => {
+            switch (kbInfo.type) {
+                case BABYLON.KeyboardEventTypes.KEYDOWN:
+                    if (kbInfo.event.key === "Shift") {
+                        this._camera.speed = 10;
+                    }
+                    break;
+                case BABYLON.KeyboardEventTypes.KEYUP:
+                    if (kbInfo.event.key === "Shift") {
+                        this._camera.speed = 2;
+                    }
+                    break;
+            }
+        });
+
         scene.onBeforeRenderObservable.add(() => {
             this._skybox.update(this._light);
             this._oceanGeometry.update();
