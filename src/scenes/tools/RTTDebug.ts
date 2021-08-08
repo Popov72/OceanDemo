@@ -42,13 +42,13 @@ export class RTTDebug {
             plane.setEnabled(show);
         }
         for (const gelem of this._guiBackgrounds) {
-            gelem.isVisible = false;
+            gelem.isVisible = show;
         }
         for (const gelem of this._guiTexts) {
-            gelem.isVisible = false;
+            gelem.isVisible = show;
         }
         for (const gelem of this._guiButtons) {
-            gelem.isVisible = false;
+            gelem.isVisible = show;
         }
         this._gui.layer!.isEnabled = show;
     }
