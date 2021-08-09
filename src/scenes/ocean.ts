@@ -150,24 +150,26 @@ export class Ocean implements CreateSceneClass {
             this._buoyancy.update();
         });
 
-        return scene;
+        return new Promise((resolve) => {
+            scene.executeWhenReady(() => resolve(scene));
+        });
     }
 
     private _setCameraKeys(): void {
         const kbInputs = this._camera.inputs.attached.keyboard as BABYLON.FreeCameraKeyboardMoveInput;
         if (this._useZQSD) {
-            kbInputs.keysDown = [83];
-            kbInputs.keysLeft = [81];
-            kbInputs.keysRight = [68];
-            kbInputs.keysUp = [90];
+            kbInputs.keysDown = [40, 83];
+            kbInputs.keysLeft = [37, 81];
+            kbInputs.keysRight = [39, 68];
+            kbInputs.keysUp = [38, 90];
         } else {
-            kbInputs.keysDown = [83];
-            kbInputs.keysLeft = [65];
-            kbInputs.keysRight = [68];
-            kbInputs.keysUp = [87];
+            kbInputs.keysDown = [40, 83];
+            kbInputs.keysLeft = [37, 65];
+            kbInputs.keysRight = [39, 68];
+            kbInputs.keysUp = [38, 87];
         }
-        kbInputs.keysDownward = [32];
-        kbInputs.keysUpward = [69];
+        kbInputs.keysDownward = [34, 32];
+        kbInputs.keysUpward = [33, 69];
     }
 
     private _checkSupport(): boolean {
