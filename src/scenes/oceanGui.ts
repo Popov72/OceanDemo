@@ -37,7 +37,7 @@ export class OceanGUI {
         }
     
         this._gui = new dat.GUI();
-        this._gui.domElement.style.marginTop = "50px";
+        this._gui.domElement.style.marginTop = "60px";
         this._gui.domElement.id = "datGUI";
 
         this._setupKeyboard();
