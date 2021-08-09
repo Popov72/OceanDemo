@@ -16,6 +16,7 @@ export class SkyBox {
     private _skyboxObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.Scene>>;
     private _dirty: boolean;
     private _dirtyCount: number;
+    private _needPolynomialsRegen: boolean;
 
     public get probe(): BABYLON.Nullable<BABYLON.ReflectionProbe> {
         return this._probe;
@@ -29,6 +30,7 @@ export class SkyBox {
         this._dirty = true;
         this._dirtyCount = 2;
         this._probe.cubeTexture.refreshRate = 1;
+        this._needPolynomialsRegen = true;
     }
 
     constructor(useProcedural: boolean, scene: BABYLON.Scene) {
@@ -39,6 +41,7 @@ export class SkyBox {
         this._probe = null as any;
         this._dirty = false;
         this._dirtyCount = 0;
+        this._needPolynomialsRegen = false;
 
         this._skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size: 1000.0, sideOrientation: BABYLON.Mesh.BACKSIDE}, this._scene);
 
@@ -55,12 +58,16 @@ export class SkyBox {
         } else {
             this._initSkybox();
         }
+
+        this.setAsDirty();
     }
 
     public update(light: BABYLON.ShadowLight): void {
         if (!this._procedural) {
             return;
         }
+        const texture = this._probe.cubeTexture.getInternalTexture()!;
+
         if (!this._oldSunPosition.equals(this._skyMaterial.sunPosition) || this._dirty) {
             this._oldSunPosition.copyFrom(this._skyMaterial.sunPosition);
             if (this._dirtyCount-- === 0) {
@@ -68,6 +75,11 @@ export class SkyBox {
                 this._probe.cubeTexture.refreshRate = 0;
             }
         }
+        if (!this._dirty && this._needPolynomialsRegen && texture._sphericalPolynomialComputed) {
+            this._forcePolynomialsRecompute(texture);
+            this._needPolynomialsRegen = false;
+        }
+
         light.position = this._skyMaterial.sunPosition;
         light.direction = this._skyMaterial.sunPosition.negate().normalize();
         light.diffuse = (this._skyMaterial as any).getSunColor();
@@ -89,6 +101,12 @@ export class SkyBox {
         this._scene.environmentTexture = null;
     }
 
+    private _forcePolynomialsRecompute(texture: BABYLON.InternalTexture): void {
+        texture._sphericalPolynomial = null;
+        texture._sphericalPolynomialPromise = null;
+        texture._sphericalPolynomialComputed = false;
+    }
+
     private _initProceduralSkybox(): void {
         this._skyMaterial = new SkyMaterial('sky', this._scene);
         this._skybox.material = this._skyMaterial;
@@ -103,14 +121,15 @@ export class SkyBox {
 
         this._probe.cubeTexture.refreshRate = 0;
 
-        const forcePolynomialsRecompute = (texture: BABYLON.InternalTexture) => {
-            texture._sphericalPolynomial = null;
-            texture._sphericalPolynomialPromise = null;
-            texture._sphericalPolynomialComputed = false;
-        };
-
         this._probe.cubeTexture.onAfterUnbindObservable.add(() => {
-            forcePolynomialsRecompute(this._probe.cubeTexture.getInternalTexture()!);
+            const texture = this._probe.cubeTexture.getInternalTexture()!;
+            if (texture._sphericalPolynomialComputed) {
+                // the previous computation is finished, we can start a new one
+                this._forcePolynomialsRecompute(texture);
+                this._needPolynomialsRegen = false;
+            } else {
+                this._needPolynomialsRegen = true;
+            }
         });
 
         this._scene.environmentTexture = this._probe.cubeTexture;
