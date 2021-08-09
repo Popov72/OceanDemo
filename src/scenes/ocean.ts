@@ -1,5 +1,6 @@
 /**
  * Based on the great Unity project https://github.com/gasgiant/FFT-Ocean by Ivan Pensionerov (https://github.com/gasgiant)
+ * buoy, fisher_boat and dart_tsunami_buoy meshes are from Sketchfab (https://sketchfab.com/feed)
  */
 import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";

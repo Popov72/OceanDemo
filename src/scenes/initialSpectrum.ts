@@ -4,7 +4,7 @@ import { ComputeHelper } from "./tools/computeHelper";
 import { WavesSettings } from "./wavesSettings";
 
 import initialSpectrumCS from "../../assets/ocean/initialSpectrum.wgsl";
-import initialSpectrumCS2 from "../../assets/ocean/initialSpectrum2.wgsl";
+import initialSpectrum2CS from "../../assets/ocean/initialSpectrum2.wgsl";
 
 export class InitialSpectrum {
 
@@ -68,7 +68,7 @@ export class InitialSpectrum {
         this._phase1.setStorageBuffer("spectrumParameters", this._spectrumParameters);
         this._phase1.setUniformBuffer("params", this._params);
 
-        this._phase2 = new BABYLON.ComputeShader("initialSpectrum2", this._engine, { computeSource: initialSpectrumCS2 }, {
+        this._phase2 = new BABYLON.ComputeShader("initialSpectrum2", this._engine, { computeSource: initialSpectrum2CS }, {
             bindingsMapping: {
                 "H0": { group: 0, binding: 0 },
                 "params": { group: 0, binding: 5 },

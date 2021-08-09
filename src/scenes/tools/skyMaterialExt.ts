@@ -1,8 +1,9 @@
 import * as BABYLON from "@babylonjs/core";
 import { SkyMaterial } from "@babylonjs/materials";
 import { Vector3Float32 } from "./math.vector.float32";
+import { Tools } from "@babylonjs/core/Misc/tools";
 
-const f32 = BABYLON.Tools.FloatRound;
+const f32 = Tools.FloatRound;
 
 const PI = f32(Math.PI);
 const sunPosition = new Vector3Float32();

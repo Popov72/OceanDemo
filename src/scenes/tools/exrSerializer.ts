@@ -1,4 +1,4 @@
-import * as BABYLON from "@babylonjs/core";
+import { Tools } from "@babylonjs/core/Misc/tools";
 
 enum PixelType {
     UINT = 0,
@@ -40,7 +40,7 @@ export class EXRSerializer {
     }
 
     constructor() {
-        this._buffer = new Uint8Array();
+        this._buffer = new Uint8Array(0);
         this._dataLength = 0;
         this._view = new DataView(this._buffer.buffer);
         this._growSize = 2000;
@@ -106,7 +106,7 @@ export class EXRSerializer {
     }
 
     public download(fileName: string): void {
-        BABYLON.Tools.Download(new Blob([this._buffer.buffer], { type: "application/octet-stream" }), fileName);
+        Tools.Download(new Blob([this._buffer.buffer], { type: "application/octet-stream" }), fileName);
     }
 
     private _addHeaderAttribute_chlist(name: string, channels: IChannelLayout[]): void {

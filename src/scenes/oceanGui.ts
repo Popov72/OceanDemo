@@ -1,4 +1,5 @@
 import * as BABYLON from "@babylonjs/core";
+import { Tools } from "@babylonjs/core/Misc/tools";
 
 declare var dat: any;
 
@@ -12,7 +13,7 @@ export class OceanGUI {
     private _onKeyObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.KeyboardInfo>>;
 
     public static LoadDAT(): Promise<void> {
-        return BABYLON.Tools.LoadScriptAsync("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js");
+        return Tools.LoadScriptAsync("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js");
     }
 
     public set visible(v: boolean) {
