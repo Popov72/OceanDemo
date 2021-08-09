@@ -148,8 +148,13 @@ export class WavesCascade {
         this._fft.IFFT2D(this._DxxDzz, this._buffer);
 
         // Filling displacement and normals textures
+        let deltaTime = this._engine.getDeltaTime() / 1000;
+        if (deltaTime > 0.5) {
+            // avoid too big delta time
+            deltaTime = 0.5;
+        }
         this._texturesMergerParams.updateFloat("Lambda", this._lambda);
-        this._texturesMergerParams.updateFloat("DeltaTime", this._engine.getDeltaTime() / 1000);
+        this._texturesMergerParams.updateFloat("DeltaTime", deltaTime);
         this._texturesMergerParams.update();
 
         this._pingPongTurbulence = !this._pingPongTurbulence;
