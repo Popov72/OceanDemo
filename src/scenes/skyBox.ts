@@ -68,6 +68,8 @@ export class SkyBox {
         }
         const texture = this._probe.cubeTexture.getInternalTexture()!;
 
+        this._probe.position.copyFrom(this._skybox.position);
+
         if (!this._oldSunPosition.equals(this._skyMaterial.sunPosition) || this._dirty) {
             this._oldSunPosition.copyFrom(this._skyMaterial.sunPosition);
             if (this._dirtyCount-- === 0) {
