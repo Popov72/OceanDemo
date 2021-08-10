@@ -164,8 +164,8 @@ export class WavesCascade {
 
         ComputeHelper.Dispatch(this._texturesMerger, this._size, this._size, 1);
 
-        (this._engine as any)._generateMipmaps(this._derivatives.getInternalTexture(), (this._engine as any)._renderTargetEncoder);
-        (this._engine as any)._generateMipmaps(this._pingPongTurbulence ?  this._turbulence2.getInternalTexture() : this._turbulence.getInternalTexture(), (this._engine as any)._renderTargetEncoder);
+        this._engine.generateMipmaps(this._derivatives.getInternalTexture()!);
+        this._engine.generateMipmaps(this._pingPongTurbulence ?  this._turbulence2.getInternalTexture()! : this._turbulence.getInternalTexture()!);
     }
 
     public dispose(): void {
