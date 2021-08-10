@@ -72,6 +72,9 @@ export class SkyBox {
 
         if (!this._oldSunPosition.equals(this._skyMaterial.sunPosition) || this._dirty) {
             this._oldSunPosition.copyFrom(this._skyMaterial.sunPosition);
+            light.position = this._skyMaterial.sunPosition;
+            light.direction = this._skyMaterial.sunPosition.negate().normalize();
+            light.diffuse = (this._skyMaterial as any).getSunColor().toLinearSpace();
             if (this._dirtyCount-- === 0) {
                 this._dirty = false;
                 this._probe.cubeTexture.refreshRate = 0;
@@ -81,10 +84,6 @@ export class SkyBox {
             this._probe.cubeTexture.forceSphericalPolynomialsRecompute();
             this._needPolynomialsRegen = false;
         }
-
-        light.position = this._skyMaterial.sunPosition;
-        light.direction = this._skyMaterial.sunPosition.negate().normalize();
-        light.diffuse = (this._skyMaterial as any).getSunColor();
     }
 
     public dispose(): void {
