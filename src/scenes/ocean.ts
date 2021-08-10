@@ -99,6 +99,14 @@ export class Ocean implements CreateSceneClass {
 
         this._camera.attachControl(canvas, true);
 
+        const cameraUpdate = this._camera.update.bind(this._camera);
+        this._camera.update = function() {
+            cameraUpdate();
+            if (this.position.y < 1.5) {
+                this.position.y = 1.5;
+            }
+        };
+
         this._depthRenderer = this._scene.enableDepthRenderer(this._camera, false);
         this._depthRenderer.getDepthMap().renderList = [];
         
