@@ -134,11 +134,15 @@ wgsl = [
 pgCode = []
 pgCode.append('''
 async function createEngine() {
-    const engine = new BABYLON.WebGPUEngine(document.getElementById("renderCanvas") as HTMLCanvasElement, {
-        forceCopyForInvertYFinalFramebuffer : true
-    });
-    await engine.initAsync();
-    return engine;
+    const webGPUSupported = await (BABYLON.WebGPUEngine as any).IsSupportedAsync;
+    if (webGPUSupported) {
+        const engine = new BABYLON.WebGPUEngine(document.getElementById("renderCanvas") as HTMLCanvasElement, {
+            forceCopyForInvertYFinalFramebuffer : true
+        });
+        await engine.initAsync();
+        return engine;
+    }
+    return new BABYLON.Engine(document.getElementById("renderCanvas") as HTMLCanvasElement, true);
 }
 
 class Playground {
