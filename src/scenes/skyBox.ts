@@ -76,7 +76,7 @@ export class SkyBox {
             }
         }
         if (!this._dirty && this._needPolynomialsRegen && texture._sphericalPolynomialComputed) {
-            this._forcePolynomialsRecompute(texture);
+            this._probe.cubeTexture.forceSphericalPolynomialsRecompute();
             this._needPolynomialsRegen = false;
         }
 
@@ -101,12 +101,6 @@ export class SkyBox {
         this._scene.environmentTexture = null;
     }
 
-    private _forcePolynomialsRecompute(texture: BABYLON.InternalTexture): void {
-        texture._sphericalPolynomial = null;
-        texture._sphericalPolynomialPromise = null;
-        texture._sphericalPolynomialComputed = false;
-    }
-
     private _initProceduralSkybox(): void {
         this._skyMaterial = new SkyMaterial('sky', this._scene);
         this._skybox.material = this._skyMaterial;
@@ -125,7 +119,7 @@ export class SkyBox {
             const texture = this._probe.cubeTexture.getInternalTexture()!;
             if (texture._sphericalPolynomialComputed) {
                 // the previous computation is finished, we can start a new one
-                this._forcePolynomialsRecompute(texture);
+                this._probe.cubeTexture.forceSphericalPolynomialsRecompute();
                 this._needPolynomialsRegen = false;
             } else {
                 this._needPolynomialsRegen = true;
