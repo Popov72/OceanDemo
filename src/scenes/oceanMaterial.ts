@@ -92,9 +92,9 @@ export class OceanMaterial {
             mat.AddUniform("_FoamBiasLOD2", "float", 2.72);
 
             mat.AddUniform("_SSSColor", "vec3", new BABYLON.Vector3(0.1541919, 0.8857628, 0.990566));
-            mat.AddUniform("_SSSStrength", "float", 0.168);
-            mat.AddUniform("_SSSBase", "float", -1.31);
-            mat.AddUniform("_SSSScale", "float", 3.88);
+            mat.AddUniform("_SSSStrength", "float", 0.15);
+            mat.AddUniform("_SSSBase", "float", -0.261);
+            mat.AddUniform("_SSSScale", "float", 4.7);
 
             mat.AddUniform("lightDirection", "vec3", "");
             mat.AddUniform("_WorldSpaceCameraPos", "vec3", "");
