@@ -68,8 +68,6 @@ export class SkyBox {
         }
         const texture = this._probe.cubeTexture.getInternalTexture()!;
 
-        this._probe.position.copyFrom(this._skybox.position);
-
         if (!this._oldSunPosition.equals(this._skyMaterial.sunPosition) || this._dirty) {
             this._oldSunPosition.copyFrom(this._skyMaterial.sunPosition);
             light.position = this._skyMaterial.sunPosition;
@@ -114,6 +112,8 @@ export class SkyBox {
         this._probe = new BABYLON.ReflectionProbe('skyProbe', 128, this._scene, true, true, true);
         this._probe.renderList!.push(this._skybox);
 
+        this._probe.attachToMesh(this._skybox);
+        this._probe.cubeTexture.activeCamera = this._scene.activeCameras?.[0] ?? this._scene.activeCamera!;
         this._probe.cubeTexture.refreshRate = 0;
 
         this._probe.cubeTexture.onAfterUnbindObservable.add(() => {
