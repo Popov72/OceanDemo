@@ -62,26 +62,32 @@ export class SkyBox {
         this.setAsDirty();
     }
 
-    public update(light: BABYLON.ShadowLight): void {
+    public update(light: BABYLON.ShadowLight): boolean {
         if (!this._procedural) {
-            return;
+            return false;
         }
+
+        let ret = false;
+
         const texture = this._probe.cubeTexture.getInternalTexture()!;
 
         if (!this._oldSunPosition.equals(this._skyMaterial.sunPosition) || this._dirty) {
             this._oldSunPosition.copyFrom(this._skyMaterial.sunPosition);
-            light.position = this._skyMaterial.sunPosition;
+            light.position = this._skyMaterial.sunPosition.clone();
             light.direction = this._skyMaterial.sunPosition.negate().normalize();
             light.diffuse = (this._skyMaterial as any).getSunColor().toLinearSpace();
             if (this._dirtyCount-- === 0) {
                 this._dirty = false;
                 this._probe.cubeTexture.refreshRate = 0;
             }
+            ret = true;
         }
         if (!this._dirty && this._needPolynomialsRegen && texture._sphericalPolynomialComputed) {
             this._probe.cubeTexture.forceSphericalPolynomialsRecompute();
             this._needPolynomialsRegen = false;
         }
+
+        return ret;
     }
 
     public dispose(): void {

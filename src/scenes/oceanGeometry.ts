@@ -247,6 +247,7 @@ export class OceanGeometry {
         mesh.name = name;
         mesh.material = mat;
         mesh.parent = this._root;
+        mesh.receiveShadows = true;
 
         return mesh;
     }

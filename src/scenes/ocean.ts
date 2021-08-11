@@ -28,7 +28,7 @@ export class Ocean implements CreateSceneClass {
     private _scene: BABYLON.Scene;
     private _camera: BABYLON.TargetCamera;
     private _rttDebug: RTTDebug;
-    private _light: BABYLON.ShadowLight;
+    private _light: BABYLON.DirectionalLight;
     private _depthRenderer: BABYLON.DepthRenderer;
     private _buoyancy: Buoyancy;
     private _wavesSettings: WavesSettings;
@@ -42,6 +42,7 @@ export class Ocean implements CreateSceneClass {
     private _useZQSD: boolean;
     private _useProceduralSky: boolean
     private _lightDirection: BABYLON.Vector3;
+    private _shadowGenerator: BABYLON.ShadowGenerator;
 
     constructor() {
         this._engine = null as any;
@@ -60,6 +61,7 @@ export class Ocean implements CreateSceneClass {
         this._useZQSD = false;
         this._useProceduralSky = true;
         this._lightDirection = new BABYLON.Vector3(0, -1, -0.25);
+        this._shadowGenerator = null as any;
 
         this._size = 0;
         this._wavesSettings = new WavesSettings();
@@ -113,6 +115,13 @@ export class Ocean implements CreateSceneClass {
         this._light = new BABYLON.DirectionalLight("light", this._lightDirection, scene);
         this._light.intensity = 1;
         this._light.diffuse = new BABYLON.Color3(1, 1, 1);
+        this._light.shadowMinZ = 0;
+        this._light.shadowMaxZ = 40;
+        this._light.shadowOrthoScale = 0.5;
+
+        this._shadowGenerator = new BABYLON.ShadowGenerator(4096, this._light);
+        this._shadowGenerator.usePercentageCloserFiltering = true;
+        this._shadowGenerator.bias = 0.005;
 
         this._skybox = new SkyBox(this._useProceduralSky, scene);
         this._buoyancy = new Buoyancy(this._size, 3, 0.2);
@@ -151,7 +160,9 @@ export class Ocean implements CreateSceneClass {
         });
 
         scene.onBeforeRenderObservable.add(() => {
-            this._skybox.update(this._light);
+            if (this._skybox.update(this._light)) {
+                this._light.position = this._light.position.clone().normalize().scaleInPlace(30);
+            }
             this._oceanGeometry.update();
             this._wavesGenerator!.update();
             this._buoyancy.setWaterHeightMap(this._wavesGenerator!.waterHeightMap, this._wavesGenerator!.waterHeightMapScale);
@@ -214,8 +225,11 @@ export class Ocean implements CreateSceneClass {
         buoyMesh.scaling.setAll(0.1);
         buoyMesh.position.y = -0.3;
         buoyMesh.position.z = -15;
+        buoyMesh.receiveShadows = true;
+
         this._depthRenderer.getDepthMap().renderList!.push(buoyMesh);
         this._buoyancy.addMesh(buoyMesh, { v1: new BABYLON.Vector3(0, 5, -6), v2: new BABYLON.Vector3(0, 5, 6), v3: new BABYLON.Vector3(5, 5, -6) }, -0.3, 1);
+        this._shadowGenerator.addShadowCaster(buoyMesh);
 
         // Fisher boat
         await BABYLON.SceneLoader.AppendAsync("", fisher_boat, this._scene, undefined, ".glb");
@@ -226,8 +240,13 @@ export class Ocean implements CreateSceneClass {
         fisherBoat.position.x = -5;
         fisherBoat.position.y = 1.5;
         fisherBoat.position.z = -10;
+
         this._depthRenderer.getDepthMap().renderList!.push(...fisherBoat.getChildMeshes(false));
         this._buoyancy.addMesh(fisherBoat, { v1: new BABYLON.Vector3(0, 2, 0), v2: new BABYLON.Vector3(0, -1.2, 0), v3: new BABYLON.Vector3(0.4, 2, 0) }, 1.5, 0);
+        fisherBoat.getChildMeshes(false).forEach((m) => {
+            m.receiveShadows = true;
+            this._shadowGenerator.addShadowCaster(m);
+        });
 
         // Dart tsunami buoy
         await BABYLON.SceneLoader.AppendAsync("", dart_tsunami_buoy, this._scene, undefined, ".glb");
@@ -238,9 +257,22 @@ export class Ocean implements CreateSceneClass {
         dartTsunamiBuoy.bakeCurrentTransformIntoVertices();
         dartTsunamiBuoy.parent = null;
         dartTsunamiBuoy.alwaysSelectAsActiveMesh = true;
+        dartTsunamiBuoy.receiveShadows = true;
+        (dartTsunamiBuoy.material as BABYLON.PBRMaterial).unlit = false;
 
         this._depthRenderer.getDepthMap().renderList!.push(dartTsunamiBuoy);
         this._buoyancy.addMesh(dartTsunamiBuoy, { v1: new BABYLON.Vector3(0.7, 1, -1.5), v2: new BABYLON.Vector3(0.7, 1, 1.5), v3: new BABYLON.Vector3(-1.5, 1, -1.5) }, -0.5, 2);
+        this._shadowGenerator.addShadowCaster(dartTsunamiBuoy);
+
+        const slight = BABYLON.MeshBuilder.CreateSphere("slight", { segments: 6, diameter: 0.5 }, this._scene);
+        slight.position.set(0, 8, 0);
+        slight.visibility = 0;
+        slight.parent = dartTsunamiBuoy;
+
+        const plight = new BABYLON.PointLight("point", new BABYLON.Vector3(0, 0, 0), this._scene);
+        plight.intensity = 40;
+        plight.diffuse = new BABYLON.Color3(1, 1, 0).toLinearSpace();
+        plight.parent = slight;
 
         /*const sp1 = BABYLON.MeshBuilder.CreateSphere("sp1", { diameter: 1.2 }, this._scene);
         sp1.parent = dartTsunamiBuoy;
@@ -308,6 +340,8 @@ export class Ocean implements CreateSceneClass {
                 return this._light.intensity;
             case "proceduralSky":
                 return this._useProceduralSky;
+            case "enableShadows":
+                return this._light.shadowEnabled;
             case "enableFXAA":
                 return this._fxaa !== null;
             case "useZQSD":
@@ -366,6 +400,9 @@ export class Ocean implements CreateSceneClass {
                 break;
             case "lightIntensity":
                 this._light.intensity = parseFloat(value);
+                break;
+            case "enableShadows":
+                this._light.shadowEnabled = !!value;
                 break;
             case "enableFXAA":
                 if (!!value) {
