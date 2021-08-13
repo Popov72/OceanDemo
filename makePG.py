@@ -68,6 +68,10 @@ globalReplaces = [
         "find": r"\bqwantani_1k\b",
         "replace": "'https://popov72.github.io/BabylonDev/resources/webgpu/oceanDemo/0c03bd6e3c9d04da0cf428bbf487bf68.hdr'"
     },
+    {
+        "find": r"\bbabylon_buoy\b",
+        "replace": "'https://popov72.github.io/BabylonDev/resources/webgpu/oceanDemo/643a55451fd81c682e86ba94241de29e.glb'"
+    },
 ]
 
 files = [

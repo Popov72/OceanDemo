@@ -1,3 +1,4 @@
+import * as BABYLON from "@babylonjs/core";
 import { Engine } from "@babylonjs/core/Engines/engine";
 import { WebGPUEngine } from "@babylonjs/core/Engines/webgpuEngine";
 import { getSceneModuleWithName } from "./createScene";
@@ -11,6 +12,8 @@ export const babylonInit = async (): Promise<void>  => {
     const moduleName = getModuleToLoad();
     const createSceneModule = await getSceneModuleWithName(moduleName);
 
+    (window as any).BABYLON = BABYLON;
+
     // Execute the pretasks, if defined
     await Promise.all(createSceneModule.preTasks || []);
     // Get the canvas element
@@ -19,8 +22,9 @@ export const babylonInit = async (): Promise<void>  => {
     //const engine = new Engine(canvas, true); 
 
     let engine: Engine;
+    const webgpuSupported = await WebGPUEngine.IsSupportedAsync;
 
-    if (WebGPUEngine.IsSupported) {
+    if (webgpuSupported) {
         engine = new WebGPUEngine(canvas, {
             deviceDescriptor: {
                 requiredFeatures: [

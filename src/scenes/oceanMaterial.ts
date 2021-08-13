@@ -252,7 +252,6 @@ export class OceanMaterial {
                 mat.getEffect()?.setTexture("_Turbulence_c2", this._wavesGenerator.getCascade(2).turbulence);
                 mat.getEffect()?.setFloat("_Time", time);
                 mat.getEffect()?.setVector3("lightDirection", (this._scene.lights[0] as BABYLON.DirectionalLight).direction);
-                //mat.getEffect()?.setVector3("_FoamColor", new BABYLON.Vector3(this._light.diffuse.r, this._light.diffuse.g, this._light.diffuse.b));
             });
 
             return new Promise((resolve) => {

@@ -20,7 +20,11 @@ import "@babylonjs/loaders";
 import noiseEXR from "../../assets/ocean/00_noise0.exr";
 import buoy from "../../assets/ocean/buoy.glb";
 import fisher_boat from "../../assets/ocean/fisher_boat.glb";
-import dart_tsunami_buoy from "../../assets/ocean/dart_tsunami_buoy.glb";
+import babylon_buoy from "../../assets/ocean/babylonBuoy.glb";
+
+const showBuoy = false;
+const showFisherBoat = false;
+const showBabylonBuoy = true;
 
 export class Ocean implements CreateSceneClass {
 
@@ -43,6 +47,8 @@ export class Ocean implements CreateSceneClass {
     private _useProceduralSky: boolean
     private _lightDirection: BABYLON.Vector3;
     private _shadowGenerator: BABYLON.ShadowGenerator;
+    private _lightBuoy: BABYLON.PointLight;
+    private _shadowGeneratorBuoy: BABYLON.ShadowGenerator;
 
     constructor() {
         this._engine = null as any;
@@ -62,6 +68,8 @@ export class Ocean implements CreateSceneClass {
         this._useProceduralSky = true;
         this._lightDirection = new BABYLON.Vector3(0, -1, -0.25);
         this._shadowGenerator = null as any;
+        this._lightBuoy = null as any;
+        this._shadowGeneratorBuoy = null as any;
 
         this._size = 0;
         this._wavesSettings = new WavesSettings();
@@ -75,6 +83,8 @@ export class Ocean implements CreateSceneClass {
         (window as any).numbg = function(): void { console.log("NumBindGroupsCreatedTotal=", BABYLON.WebGPUCacheBindGroups.NumBindGroupsCreatedTotal, " - NumBindGroupsCreatedLastFrame=", BABYLON.WebGPUCacheBindGroups.NumBindGroupsCreatedLastFrame); };
 
         const scene = new BABYLON.Scene(engine);
+
+        scene.useRightHandedSystem = true;
 
         this._engine = engine;
         this._scene = scene;
@@ -133,7 +143,7 @@ export class Ocean implements CreateSceneClass {
 
         await this._loadMeshes();
 
-        scene.stopAllAnimations();
+        //scene.stopAllAnimations();
 
         await this._updateSize(256);
         this._oceanGeometry.initializeMeshes();
@@ -218,79 +228,101 @@ export class Ocean implements CreateSceneClass {
 
     private async _loadMeshes() {
         // Buoy
-        await BABYLON.SceneLoader.AppendAsync("", buoy, this._scene, undefined, ".glb");
+        if (showBuoy) {
+            await BABYLON.SceneLoader.AppendAsync("", buoy, this._scene, undefined, ".glb");
 
-        const buoyMesh = this._scene.getMeshByName("pTorus5_lambert1_0")!;
+            const buoyMesh = this._scene.getMeshByName("pTorus5_lambert1_0")!;
 
-        buoyMesh.scaling.setAll(0.1);
-        buoyMesh.position.y = -0.3;
-        buoyMesh.position.z = -15;
-        buoyMesh.receiveShadows = true;
+            buoyMesh.scaling.setAll(0.1);
+            buoyMesh.position.y = -0.3;
+            buoyMesh.position.z = -15;
+            buoyMesh.receiveShadows = true;
 
-        this._depthRenderer.getDepthMap().renderList!.push(buoyMesh);
-        this._buoyancy.addMesh(buoyMesh, { v1: new BABYLON.Vector3(0, 5, -6), v2: new BABYLON.Vector3(0, 5, 6), v3: new BABYLON.Vector3(5, 5, -6) }, -0.3, 1);
-        this._shadowGenerator.addShadowCaster(buoyMesh);
+            this._depthRenderer.getDepthMap().renderList!.push(buoyMesh);
+            this._buoyancy.addMesh(buoyMesh, { v1: new BABYLON.Vector3(0, 5, -6), v2: new BABYLON.Vector3(0, 5, 6), v3: new BABYLON.Vector3(5, 5, -6) }, -0.3, 1);
+            this._shadowGenerator.addShadowCaster(buoyMesh);
+        }
 
         // Fisher boat
-        await BABYLON.SceneLoader.AppendAsync("", fisher_boat, this._scene, undefined, ".glb");
+        if (showFisherBoat) {
+            await BABYLON.SceneLoader.AppendAsync("", fisher_boat, this._scene, undefined, ".glb");
 
-        const fisherBoat = this._scene.getTransformNodeByName("Cube.022")!;
+            const fisherBoat = this._scene.getTransformNodeByName("Cube.022")!;
 
-        fisherBoat.scaling.setAll(3);
-        fisherBoat.position.x = -5;
-        fisherBoat.position.y = 1.5;
-        fisherBoat.position.z = -10;
+            fisherBoat.scaling.setAll(3);
+            fisherBoat.position.x = -5;
+            fisherBoat.position.y = 1.5;
+            fisherBoat.position.z = -10;
 
-        this._depthRenderer.getDepthMap().renderList!.push(...fisherBoat.getChildMeshes(false));
-        this._buoyancy.addMesh(fisherBoat, { v1: new BABYLON.Vector3(0, 2, 0), v2: new BABYLON.Vector3(0, -1.2, 0), v3: new BABYLON.Vector3(0.4, 2, 0) }, 1.5, 0);
-        fisherBoat.getChildMeshes(false).forEach((m) => {
-            m.receiveShadows = true;
-            this._shadowGenerator.addShadowCaster(m);
-        });
+            this._depthRenderer.getDepthMap().renderList!.push(...fisherBoat.getChildMeshes(false));
+            this._buoyancy.addMesh(fisherBoat, { v1: new BABYLON.Vector3(0, 2, 0), v2: new BABYLON.Vector3(0, -1.2, 0), v3: new BABYLON.Vector3(0.4, 2, 0) }, 1.5, 0);
+            fisherBoat.getChildMeshes(false).forEach((m) => {
+                m.receiveShadows = true;
+                this._shadowGenerator.addShadowCaster(m);
+            });
+        }
 
-        // Dart tsunami buoy
-        await BABYLON.SceneLoader.AppendAsync("", dart_tsunami_buoy, this._scene, undefined, ".glb");
+        // Babylon buoy
+        if (showBabylonBuoy) {
+            await BABYLON.SceneLoader.AppendAsync("", babylon_buoy, this._scene, undefined, ".glb");
 
-        const dartTsunamiBuoy = this._scene.getMeshByName("tsunami_buoy_tsunami_buoy_0")! as BABYLON.Mesh;
+            const babylonBuoyMeshes = [this._scene.getMeshByName("buoyMesh_low") as BABYLON.Mesh, this._scene.getMeshByName("glassCovers_low") as BABYLON.Mesh];
+            const babylonBuoyRoot = babylonBuoyMeshes[0].parent as BABYLON.TransformNode;
+            const scale = 14;
 
-        dartTsunamiBuoy.scaling.setAll(0.07/4);
-        dartTsunamiBuoy.bakeCurrentTransformIntoVertices();
-        dartTsunamiBuoy.parent = null;
-        dartTsunamiBuoy.alwaysSelectAsActiveMesh = true;
-        dartTsunamiBuoy.receiveShadows = true;
-        (dartTsunamiBuoy.material as BABYLON.PBRMaterial).unlit = false;
+            babylonBuoyRoot.position.z = -8;
+            babylonBuoyRoot.scaling.setAll(scale);
 
-        this._depthRenderer.getDepthMap().renderList!.push(dartTsunamiBuoy);
-        this._buoyancy.addMesh(dartTsunamiBuoy, { v1: new BABYLON.Vector3(0.7, 1, -1.5), v2: new BABYLON.Vector3(0.7, 1, 1.5), v3: new BABYLON.Vector3(-1.5, 1, -1.5) }, -0.5, 2);
-        this._shadowGenerator.addShadowCaster(dartTsunamiBuoy);
+            babylonBuoyMeshes.forEach((mesh) => {
+                mesh.material!.backFaceCulling = false;
 
-        const slight = BABYLON.MeshBuilder.CreateSphere("slight", { segments: 6, diameter: 0.5 }, this._scene);
-        slight.position.set(0, 8, 0);
-        slight.visibility = 0;
-        slight.parent = dartTsunamiBuoy;
+                this._shadowGenerator.addShadowCaster(mesh);
+                mesh.receiveShadows = true;
+                this._depthRenderer.getDepthMap().renderList!.push(mesh);
+            });
 
-        const plight = new BABYLON.PointLight("point", new BABYLON.Vector3(0, 0, 0), this._scene);
-        plight.intensity = 40;
-        plight.diffuse = new BABYLON.Color3(1, 1, 0).toLinearSpace();
-        plight.parent = slight;
+            babylonBuoyRoot.rotationQuaternion = BABYLON.Quaternion.FromEulerAngles(0, Math.PI / 3, 0);
+            this._buoyancy.addMesh(babylonBuoyRoot, { v1: new BABYLON.Vector3(0.7 / scale, 1 / scale, -1.5 / scale), v2: new BABYLON.Vector3(0.7 / scale, 1 / scale, 1.5 / scale), v3: new BABYLON.Vector3(-1.5 / scale, 1 / scale, -1.5 / scale) }, 0.0, 2);
 
-        /*const sp1 = BABYLON.MeshBuilder.CreateSphere("sp1", { diameter: 1.2 }, this._scene);
-        sp1.parent = dartTsunamiBuoy;
-        sp1.position.x = 0.7;
-        sp1.position.y = 1;
-        sp1.position.z = -1.5;
+            const slight = BABYLON.MeshBuilder.CreateSphere("slight", { segments: 6, diameter: 0.5 / scale }, this._scene);
+            slight.position.set(-0.6 / scale, 6.58 / scale, 0.3 / scale);
+            slight.visibility = 0;
+            slight.parent = babylonBuoyRoot;
 
-        const sp2 = BABYLON.MeshBuilder.CreateSphere("sp2", { diameter: 1.2 }, this._scene);
-        sp2.parent = dartTsunamiBuoy;
-        sp2.position.x = 0.7;
-        sp2.position.y = 1;
-        sp2.position.z = 1.5;
+            //const skeleton = babylonBuoyMeshes[0].skeleton!;
+            //const bone = skeleton.bones[skeleton.getBoneIndexByName("lightPosition")];
 
-        const sp3 = BABYLON.MeshBuilder.CreateSphere("sp3", { diameter: 1.2 }, this._scene);
-        sp3.parent = dartTsunamiBuoy;
-        sp3.position.x = -1.5;
-        sp3.position.y = 1;
-        sp3.position.z = -1.5;*/
+            this._lightBuoy = new BABYLON.PointLight("point", new BABYLON.Vector3(0, 0, 0), this._scene);
+            this._lightBuoy.intensity = 30;
+            this._lightBuoy.diffuse = new BABYLON.Color3(1, 1, 0).toLinearSpace();
+            this._lightBuoy.shadowMinZ = 0.01;
+            this._lightBuoy.shadowMaxZ = 15;
+            this._lightBuoy.parent = slight;
+
+            this._shadowGeneratorBuoy = new BABYLON.ShadowGenerator(2048, this._lightBuoy);
+            this._shadowGeneratorBuoy.usePoissonSampling = true;
+            this._shadowGeneratorBuoy.addShadowCaster(babylonBuoyMeshes[0]);
+            this._shadowGeneratorBuoy.addShadowCaster(babylonBuoyMeshes[1]);
+            this._shadowGeneratorBuoy.bias = 0.01;
+
+            /*const sp1 = BABYLON.MeshBuilder.CreateSphere("sp1", { diameter: 1.2 / scale }, this._scene);
+            sp1.parent = babylonBuoyRoot;
+            sp1.position.x = 0.7 / scale;
+            sp1.position.y = 1 / scale;
+            sp1.position.z = -1.5 / scale;
+
+            const sp2 = BABYLON.MeshBuilder.CreateSphere("sp2", { diameter: 1.2 / scale }, this._scene);
+            sp2.parent = babylonBuoyRoot;
+            sp2.position.x = 0.7 / scale;
+            sp2.position.y = 1 / scale;
+            sp2.position.z = 1.5 / scale;
+
+            const sp3 = BABYLON.MeshBuilder.CreateSphere("sp3", { diameter: 1.2 / scale }, this._scene);
+            sp3.parent = babylonBuoyRoot;
+            sp3.position.x = -1.5 / scale;
+            sp3.position.y = 1 / scale;
+            sp3.position.z = -1.5 / scale;*/
+        }
     }
 
     private async _updateSize(size: number) {
@@ -403,6 +435,9 @@ export class Ocean implements CreateSceneClass {
                 break;
             case "enableShadows":
                 this._light.shadowEnabled = !!value;
+                if (this._lightBuoy) {
+                    this._lightBuoy.shadowEnabled = !!value;
+                }
                 break;
             case "enableFXAA":
                 if (!!value) {
