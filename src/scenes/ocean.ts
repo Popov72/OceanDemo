@@ -49,6 +49,8 @@ export class Ocean implements CreateSceneClass {
     private _shadowGenerator: BABYLON.ShadowGenerator;
     private _lightBuoy: BABYLON.PointLight;
     private _shadowGeneratorBuoy: BABYLON.ShadowGenerator;
+    private _glowLayer: BABYLON.GlowLayer;
+    private _forceUpdateGlowIntensity: boolean;
 
     constructor() {
         this._engine = null as any;
@@ -70,6 +72,8 @@ export class Ocean implements CreateSceneClass {
         this._shadowGenerator = null as any;
         this._lightBuoy = null as any;
         this._shadowGeneratorBuoy = null as any;
+        this._glowLayer = null as any;
+        this._forceUpdateGlowIntensity = true;
 
         this._size = 0;
         this._wavesSettings = new WavesSettings();
@@ -170,7 +174,22 @@ export class Ocean implements CreateSceneClass {
         });
 
         scene.onBeforeRenderObservable.add(() => {
-            if (this._skybox.update(this._light)) {
+            if (this._skybox.update(this._light) || this._forceUpdateGlowIntensity) {
+                if (this._glowLayer) {
+                    const minIntensity = 0.6;
+                    const maxIntensity = 3;
+                    const sunPos = this._light.position.clone().normalize();
+                    const sunProj = sunPos.clone().normalize();
+
+                    sunProj.y = 0;
+
+                    const dot = BABYLON.Vector3.Dot(sunPos, sunProj);
+                    
+                    let intensity = BABYLON.Scalar.Lerp(minIntensity, maxIntensity, BABYLON.Scalar.Clamp(dot, 0, 1));
+
+                    this._glowLayer.intensity = sunPos.y < 0 ? maxIntensity : intensity;
+                    this._forceUpdateGlowIntensity = false;
+                }
                 this._light.position = this._light.position.clone().normalize().scaleInPlace(30);
             }
             this._oceanGeometry.update();
@@ -208,7 +227,7 @@ export class Ocean implements CreateSceneClass {
 
         const panel = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-        const textNOk = "**Use WebGPU to watch this demo which requires compute shaders support. To enable WebGPU please use Edge Canary or Chrome canary. Also select the WebGPU engine from the top right drop down menu.**";
+        const textNOk = "**Use WebGPU to watch this demo which requires compute shaders support. To enable WebGPU please use Chrome Canary or Edge canary. Also select the WebGPU engine from the top right drop down menu.**";
     
         var info = new GUI.TextBlock();
         info.text = textNOk;
@@ -266,7 +285,7 @@ export class Ocean implements CreateSceneClass {
         if (showBabylonBuoy) {
             await BABYLON.SceneLoader.AppendAsync("", babylon_buoy, this._scene, undefined, ".glb");
 
-            const babylonBuoyMeshes = [this._scene.getMeshByName("buoyMesh_low") as BABYLON.Mesh, this._scene.getMeshByName("glassCovers_low") as BABYLON.Mesh];
+            const babylonBuoyMeshes = [this._scene.getMeshByName("buoyMesh_low") as BABYLON.Mesh];
             const babylonBuoyRoot = babylonBuoyMeshes[0].parent as BABYLON.TransformNode;
             const scale = 14;
 
@@ -294,7 +313,7 @@ export class Ocean implements CreateSceneClass {
 
             this._lightBuoy = new BABYLON.PointLight("point", new BABYLON.Vector3(0, 0, 0), this._scene);
             this._lightBuoy.intensity = 30;
-            this._lightBuoy.diffuse = new BABYLON.Color3(1, 1, 0).toLinearSpace();
+            this._lightBuoy.diffuse = new BABYLON.Color3(0.96, 0.70, 0.15).toLinearSpace();
             this._lightBuoy.shadowMinZ = 0.01;
             this._lightBuoy.shadowMaxZ = 15;
             this._lightBuoy.parent = slight;
@@ -302,7 +321,6 @@ export class Ocean implements CreateSceneClass {
             this._shadowGeneratorBuoy = new BABYLON.ShadowGenerator(2048, this._lightBuoy);
             this._shadowGeneratorBuoy.usePoissonSampling = true;
             this._shadowGeneratorBuoy.addShadowCaster(babylonBuoyMeshes[0]);
-            this._shadowGeneratorBuoy.addShadowCaster(babylonBuoyMeshes[1]);
             this._shadowGeneratorBuoy.bias = 0.01;
 
             /*const sp1 = BABYLON.MeshBuilder.CreateSphere("sp1", { diameter: 1.2 / scale }, this._scene);
@@ -323,6 +341,18 @@ export class Ocean implements CreateSceneClass {
             sp3.position.y = 1 / scale;
             sp3.position.z = -1.5 / scale;*/
         }
+    }
+
+    private _createGlowLayer(): void {
+        this._glowLayer = new BABYLON.GlowLayer("glow", this._scene);
+
+        this._glowLayer.addIncludedOnlyMesh(this._scene.getMeshByName("glassCovers_low") as BABYLON.Mesh);
+
+        this._glowLayer.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
+            result.set(this._lightBuoy.diffuse.r, this._lightBuoy.diffuse.g, this._lightBuoy.diffuse.b, 1);
+        };
+
+        this._forceUpdateGlowIntensity = true;
     }
 
     private async _updateSize(size: number) {
@@ -376,6 +406,8 @@ export class Ocean implements CreateSceneClass {
                 return this._light.shadowEnabled;
             case "enableFXAA":
                 return this._fxaa !== null;
+            case "enableGlow":
+                return this._glowLayer !== null;
             case "useZQSD":
                 return this._useZQSD;
             case "buoy_enabled":
@@ -448,6 +480,14 @@ export class Ocean implements CreateSceneClass {
                 } else if (this._fxaa) {
                     this._fxaa.dispose();
                     this._fxaa = null;
+                }
+                break;
+            case "enableGlow":
+                if (this._glowLayer) {
+                    this._glowLayer.dispose();
+                    this._glowLayer = null as any;
+                } else {
+                    this._createGlowLayer();
                 }
                 break;
             case "proceduralSky":

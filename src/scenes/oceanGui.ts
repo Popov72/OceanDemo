@@ -126,7 +126,8 @@ export class OceanGUI {
             lightIntensity: this._paramRead("lightIntensity"),
             proceduralSky: this._paramRead("proceduralSky"),
             enableShadows: this._paramRead("enableShadows"),
-            enableFXAA: this._paramRead("enableFXAA"),
+            //enableFXAA: this._paramRead("enableFXAA"),
+            enableGlow: this._paramRead("enableGlow"),
             useZQSD: this._paramRead("useZQSD"),
             showDebugRTT: this._paramRead("showDebugRTT"),
         };
@@ -138,7 +139,8 @@ export class OceanGUI {
         this._addSlider(general, params, "lightIntensity", "Light intensity", 0, 5, 0.05);
         this._addCheckbox(general, params, "proceduralSky", "Procedural sky");
         this._addCheckbox(general, params, "enableShadows", "Enable shadows");
-        this._addCheckbox(general, params, "enableFXAA", "Enable FXAA");
+        //this._addCheckbox(general, params, "enableFXAA", "Enable FXAA");
+        this._addCheckbox(general, params, "enableGlow", "Enable Glow layer");
         this._addCheckbox(general, params, "useZQSD", "Use ZQSD");
         this._addCheckbox(general, params, "showDebugRTT", "Show debug RTT");
 
