@@ -124,7 +124,7 @@ export class OceanGUI {
             size: this._paramRead("size"),
             envIntensity: this._paramRead("envIntensity"),
             lightIntensity: this._paramRead("lightIntensity"),
-            proceduralSky: this._paramRead("proceduralSky"),
+            //proceduralSky: this._paramRead("proceduralSky"),
             enableShadows: this._paramRead("enableShadows"),
             //enableFXAA: this._paramRead("enableFXAA"),
             enableGlow: this._paramRead("enableGlow"),
@@ -137,7 +137,7 @@ export class OceanGUI {
         this._addList(general, params, "size", "Resolution", [256, 128, 64, 32]);
         this._addSlider(general, params, "envIntensity", "Env intensity", 0, 4, 0.05);
         this._addSlider(general, params, "lightIntensity", "Light intensity", 0, 5, 0.05);
-        this._addCheckbox(general, params, "proceduralSky", "Procedural sky");
+        //this._addCheckbox(general, params, "proceduralSky", "Procedural sky");
         this._addCheckbox(general, params, "enableShadows", "Enable shadows");
         //this._addCheckbox(general, params, "enableFXAA", "Enable FXAA");
         this._addCheckbox(general, params, "enableGlow", "Enable Glow layer");
@@ -167,6 +167,8 @@ export class OceanGUI {
         this._addSlider(proceduralSky, params, "procSky_rayleigh", "Rayleigh", 0.1, 10, 0.1);
         this._addSlider(proceduralSky, params, "procSky_mieCoefficient", "Mie Coefficient", 0.0, 0.1, 0.0001);
         this._addSlider(proceduralSky, params, "procSky_mieDirectionalG", "Mie DirectionalG", 0.0, 1, 0.01);
+
+        proceduralSky.open();
     }
 
     private _makeMenuSkybox(): void {

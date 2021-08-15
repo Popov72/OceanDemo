@@ -2,7 +2,7 @@ import * as BABYLON from "@babylonjs/core";
 import { WavesGenerator } from "./wavesGenerator";
 import { PBRCustomMaterial } from "@babylonjs/materials";
 
-import foamPicture from "../../assets/ocean/foam1.jpg";
+const foamPicture = "https://assets.babylonjs.com/environments/waterFoam_circular_mask.png";
 
 export class OceanMaterial {
 
@@ -213,8 +213,8 @@ export class OceanMaterial {
                 screenUV = screenUV * 0.5 + 0.5;
                 float backgroundDepth = texture2D(_CameraDepthTexture, screenUV).r * _CameraData.y;
                 float surfaceDepth = vMetric;
-                float depthDifference = max(0.0, (backgroundDepth - surfaceDepth) - 0.1);
-                float foam = texture2D(_FoamTexture, vWorldUV * 0.5 + _Time).r;
+                float depthDifference = max(0.0, (backgroundDepth - surfaceDepth) - 0.5);
+                float foam = texture2D(_FoamTexture, vWorldUV * 0.5 + _Time * 2.).r;
                 jacobian += _ContactFoam * saturate(max(0.0, foam - depthDifference) * 5.0) * 0.9;
     
                 surfaceAlbedo = mix(vec3(0.0), _FoamColor, jacobian);

@@ -46,7 +46,7 @@ globalReplaces = [
     },
     {
         "find": r"\bnoiseEXR\b",
-        "replace": "'https://popov72.github.io/BabylonDev/resources/webgpu/oceanDemo/cb69d722ba0e1aed94b8f0e32058b799.exr'"
+        "replace": "'https://assets.babylonjs.com/environments/noise.exr'"
     },
     {
         "find": r"\bbuoy\b",
@@ -61,16 +61,12 @@ globalReplaces = [
         "replace": "'https://popov72.github.io/BabylonDev/resources/webgpu/oceanDemo/5b0b186220463f71ca8c72af6f8a9434.glb'"
     },
     {
-        "find": r"\bfoamPicture\b",
-        "replace": "'https://popov72.github.io/BabylonDev/resources/webgpu/oceanDemo/9c85eca814352b70dd5242dd178d6d9c.jpg'"
-    },
-    {
         "find": r"\bqwantani_1k\b",
         "replace": "'https://popov72.github.io/BabylonDev/resources/webgpu/oceanDemo/0c03bd6e3c9d04da0cf428bbf487bf68.hdr'"
     },
     {
         "find": r"\bbabylon_buoy\b",
-        "replace": "'https://popov72.github.io/BabylonDev/resources/webgpu/oceanDemo/643a55451fd81c682e86ba94241de29e.glb'"
+        "replace": "'https://assets.babylonjs.com/meshes/babylonBuoy.glb'"
     },
 ]
 
