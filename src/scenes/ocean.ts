@@ -1,6 +1,6 @@
 /**
  * Based on the great Unity project https://github.com/gasgiant/FFT-Ocean by Ivan Pensionerov (https://github.com/gasgiant)
- * buoy, fisher_boat and dart_tsunami_buoy meshes are from Sketchfab (https://sketchfab.com/feed)
+ * buoy and fisher_boat meshes are from Sketchfab (https://sketchfab.com/feed)
  */
 import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
@@ -307,9 +307,6 @@ export class Ocean implements CreateSceneClass {
             slight.position.set(-0.6 / scale, 6.58 / scale, 0.3 / scale);
             slight.visibility = 0;
             slight.parent = babylonBuoyRoot;
-
-            //const skeleton = babylonBuoyMeshes[0].skeleton!;
-            //const bone = skeleton.bones[skeleton.getBoneIndexByName("lightPosition")];
 
             this._lightBuoy = new BABYLON.PointLight("point", new BABYLON.Vector3(0, 0, 0), this._scene);
             this._lightBuoy.intensity = 30;

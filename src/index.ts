@@ -12,7 +12,7 @@ export const babylonInit = async (): Promise<void>  => {
     const moduleName = getModuleToLoad();
     const createSceneModule = await getSceneModuleWithName(moduleName);
 
-    (window as any).BABYLON = BABYLON;
+    (window as any).BABYLON = BABYLON; // required for ES6 to work for the time being
 
     // Execute the pretasks, if defined
     await Promise.all(createSceneModule.preTasks || []);

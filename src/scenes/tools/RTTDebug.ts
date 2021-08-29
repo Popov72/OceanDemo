@@ -193,14 +193,14 @@ export class RTTDebug {
 
         const invTransfMatrix = this._camera.getTransformationMatrix().invert();
 
-        const p = new BABYLON.Vector3(-1, 1, 0 + 0.001);
-        const q = new BABYLON.Vector3(-1, 1, 0 + 0.001);
+        const planeSize = (2 - planeSpacing * numTotalPlanes) / numTotalPlanes;
+        const y = Math.floor(screenHeight * planeSize * ratio / 2 + 5);
+
+        const p = new BABYLON.Vector3(-1, 1 - planeSize * ratio, 0 + 0.001);
+        const q = new BABYLON.Vector3(-1, 1 - planeSize * ratio, 0 + 0.001);
 
         p.x += planeSpacing / 2;
         q.x += planeSpacing / 2;
-
-        const planeSize = (2 - planeSpacing * numTotalPlanes) / numTotalPlanes;
-        const y = Math.floor(screenHeight * planeSize * ratio / 2 + 5);
 
         this._guiBackgrounds[0].parent!.paddingTop = y + "px";
 
