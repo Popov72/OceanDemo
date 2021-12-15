@@ -1,14 +1,14 @@
 {
-    "name": "babylonjs-typescript-webpack-simple-scene",
+    "name": "babylonjs-ocean-demo",
     "version": "0.0.1",
-    "description": "A simple scene using Babylon.js, typescript and webpack. What could go wrong?",
+    "description": "Port of the Unity Ocean demo https://github.com/gasgiant/FFT-Ocean in Babylon.js WebGPU",
     "main": "index.ts",
     "dependencies": {
-        "@babylonjs/core": "^5.0.0-alpha.43",
-        "@babylonjs/gui": "^5.0.0-alpha.43",
-        "@babylonjs/inspector": "^5.0.0-alpha.43",
-        "@babylonjs/loaders": "^5.0.0-alpha.43",
-        "@babylonjs/materials": "^5.0.0-alpha.43"
+        "@babylonjs/core": "^5.0.0-alpha.64",
+        "@babylonjs/gui": "^5.0.0-alpha.64",
+        "@babylonjs/inspector": "^5.0.0-alpha.64",
+        "@babylonjs/loaders": "^5.0.0-alpha.64",
+        "@babylonjs/materials": "^5.0.0-alpha.64"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^2.30.0",
@@ -34,23 +34,19 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/RaananW/babylonjs-webpack-es6.git"
+        "url": "git+https://github.com/Popov72/OceanDemo.git"
     },
     "keywords": [
         "Babylon.js",
-        "webpack",
-        "getting started",
-        "typescript",
-        "es6"
+        "compute shader",
+        "ocean",
+        "webgpu"
     ],
     "author": {
-        "name": "Raanan Weber",
-        "email": "info@raananweber.com",
-        "url": "http://blog.raananweber.com/"
+        "name": "Popov",
+        "email": "popov@github.com",
+        "url": "http://www.evpopov.com/"
     },
-    "license": "Apache-2.0",
-    "bugs": {
-        "url": "https://github.com/RaananW/babylonjs-webpack-es6/issues"
-    },
-    "homepage": "https://github.com/RaananW/babylonjs-webpack-es6"
+    "license": "MIT",
+    "homepage": "https://github.com/Popov72/OceanDemo"
 }
