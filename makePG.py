@@ -133,12 +133,14 @@ wgsl = [
 ]
 pgCode = []
 pgCode.append('''
+/**
+ * Based on the great Unity project https://github.com/gasgiant/FFT-Ocean by Ivan Pensionerov (https://github.com/gasgiant)
+ */
+
 async function createEngine() {
     const webGPUSupported = await (BABYLON.WebGPUEngine as any).IsSupportedAsync;
     if (webGPUSupported) {
-        const engine = new BABYLON.WebGPUEngine(document.getElementById("renderCanvas") as HTMLCanvasElement, {
-            forceCopyForInvertYFinalFramebuffer : true
-        });
+        const engine = new BABYLON.WebGPUEngine(document.getElementById("renderCanvas") as HTMLCanvasElement);
         await engine.initAsync();
         return engine;
     }
@@ -151,11 +153,6 @@ class Playground {
         return oceanDemo.createScene(engine, canvas);
     }
 }
-
-declare var BigInt: any;
-declare type BigInt = any;
-declare var BigUint64Array: any;
-declare type BigUint64Array = any;
 ''')
 for file in files:
     name = file['name']

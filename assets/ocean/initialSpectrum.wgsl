@@ -1,10 +1,10 @@
 let PI : f32 = 3.1415926;
 
-[[group(0), binding(1)]] var WavesData : texture_storage_2d<rgba32float, write>;
-[[group(0), binding(2)]] var H0K : texture_storage_2d<rg32float, write>;
-[[group(0), binding(4)]] var Noise : texture_2d<f32>;
+@group(0) @binding(1) var WavesData : texture_storage_2d<rgba32float, write>;
+@group(0) @binding(2) var H0K : texture_storage_2d<rg32float, write>;
+@group(0) @binding(4) var Noise : texture_2d<f32>;
 
-[[block]] struct Params {
+struct Params {
     Size : u32;
     LengthScale : f32;
     CutoffHigh : f32;
@@ -13,7 +13,7 @@ let PI : f32 = 3.1415926;
     Depth : f32;
 };
 
-[[group(0), binding(5)]] var<uniform> params : Params;
+@group(0) @binding(5) var<uniform> params : Params;
 
 struct SpectrumParameter {
 	scale : f32;
@@ -26,11 +26,11 @@ struct SpectrumParameter {
 	shortWavesFade : f32;
 };
 
-[[block]] struct SpectrumParameters {
+struct SpectrumParameters {
     elements : array<SpectrumParameter>;
 };
 
-[[group(0), binding(6)]] var<storage, read> spectrums : SpectrumParameters;
+@group(0) @binding(6) var<storage, read> spectrums : SpectrumParameters;
 
 fn frequency(k: f32, g: f32, depth: f32) -> f32
 {
@@ -110,8 +110,8 @@ fn shortWavesFade(kLength: f32, pars: SpectrumParameter) -> f32
 	return exp(-pars.shortWavesFade * pars.shortWavesFade * kLength * kLength);
 }
 
-[[stage(compute), workgroup_size(8,8,1)]]
-fn calculateInitialSpectrum([[builtin(global_invocation_id)]] id : vec3<u32>)
+@stage(compute) @workgroup_size(8,8,1)
+fn calculateInitialSpectrum(@builtin(global_invocation_id) id : vec3<u32>)
 {
 	let deltaK = 2.0 * PI / params.LengthScale;
 	let nx = f32(id.x) - f32(params.Size) / 2.0;

@@ -1,24 +1,24 @@
-[[group(0), binding(1)]] var H0 : texture_2d<f32>;
-[[group(0), binding(3)]] var WavesData : texture_2d<f32>;
+@group(0) @binding(1) var H0 : texture_2d<f32>;
+@group(0) @binding(3) var WavesData : texture_2d<f32>;
 
-[[block]] struct Params {
+struct Params {
     Time : f32;
 };
 
-[[group(0), binding(4)]] var<uniform> params : Params;
+@group(0) @binding(4) var<uniform> params : Params;
 
-[[group(0), binding(5)]] var DxDz : texture_storage_2d<rg32float, write>;
-[[group(0), binding(6)]] var DyDxz : texture_storage_2d<rg32float, write>;
-[[group(0), binding(7)]] var DyxDyz : texture_storage_2d<rg32float, write>;
-[[group(0), binding(8)]] var DxxDzz : texture_storage_2d<rg32float, write>;
+@group(0) @binding(5) var DxDz : texture_storage_2d<rg32float, write>;
+@group(0) @binding(6) var DyDxz : texture_storage_2d<rg32float, write>;
+@group(0) @binding(7) var DyxDyz : texture_storage_2d<rg32float, write>;
+@group(0) @binding(8) var DxxDzz : texture_storage_2d<rg32float, write>;
 
 fn complexMult(a: vec2<f32>, b: vec2<f32>) -> vec2<f32>
 {
 	return vec2<f32>(a.r * b.r - a.g * b.g, a.r * b.g + a.g * b.r);
 }
 
-[[stage(compute), workgroup_size(8,8,1)]]
-fn calculateAmplitudes([[builtin(global_invocation_id)]] id : vec3<u32>)
+@stage(compute) @workgroup_size(8,8,1)
+fn calculateAmplitudes(@builtin(global_invocation_id) id : vec3<u32>)
 {
     let iid = vec3<i32>(id);
 	let wave = textureLoad(WavesData, iid.xy, 0);

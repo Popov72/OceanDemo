@@ -14,17 +14,17 @@ export class ComputeHelper {
     private static _clearTextureParams: BABYLON.UniformBuffer;
 
     private static _clearTextureComputeShader = `
-        [[group(0), binding(0)]] var tbuf : texture_storage_2d<rgba32float, write>;
+        @group(0) @binding(0) var tbuf : texture_storage_2d<rgba32float, write>;
 
-        [[block]] struct Params {
+        struct Params {
             color : vec4<f32>;
             width : u32;
             height : u32;
         };
-        [[group(0), binding(1)]] var<uniform> params : Params;
+        @group(0) @binding(1) var<uniform> params : Params;
 
-        [[stage(compute), workgroup_size(8, 8, 1)]]
-        fn main([[builtin(global_invocation_id)]] global_id : vec3<u32>) {
+        @stage(compute) @workgroup_size(8, 8, 1)
+        fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
             }
@@ -33,17 +33,17 @@ export class ComputeHelper {
     `;
 
     private static _copyTexture4ComputeShader = `
-        [[group(0), binding(0)]] var dest : texture_storage_2d<rgba32float, write>;
-        [[group(0), binding(1)]] var src : texture_2d<f32>;
+        @group(0) @binding(0) var dest : texture_storage_2d<rgba32float, write>;
+        @group(0) @binding(1) var src : texture_2d<f32>;
 
-        [[block]] struct Params {
+        struct Params {
             width : u32;
             height : u32;
         };
-        [[group(0), binding(2)]] var<uniform> params : Params;
+        @group(0) @binding(2) var<uniform> params : Params;
 
-        [[stage(compute), workgroup_size(8, 8, 1)]]
-        fn main([[builtin(global_invocation_id)]] global_id : vec3<u32>) {
+        @stage(compute) @workgroup_size(8, 8, 1)
+        fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
             }
@@ -53,17 +53,17 @@ export class ComputeHelper {
     `;
 
     private static _copyTexture2ComputeShader = `
-        [[group(0), binding(0)]] var dest : texture_storage_2d<rg32float, write>;
-        [[group(0), binding(1)]] var src : texture_2d<f32>;
+        @group(0) @binding(0) var dest : texture_storage_2d<rg32float, write>;
+        @group(0) @binding(1) var src : texture_2d<f32>;
 
-        [[block]] struct Params {
+        struct Params {
             width : u32;
             height : u32;
         };
-        [[group(0), binding(2)]] var<uniform> params : Params;
+        @group(0) @binding(2) var<uniform> params : Params;
 
-        [[stage(compute), workgroup_size(8, 8, 1)]]
-        fn main([[builtin(global_invocation_id)]] global_id : vec3<u32>) {
+        @stage(compute) @workgroup_size(8, 8, 1)
+        fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
             }
@@ -73,21 +73,21 @@ export class ComputeHelper {
     `;
 
     private static _copyBufferTextureComputeShader = `
-        [[block]] struct FloatArray {
+        struct FloatArray {
             elements : array<f32>;
         };
 
-        [[group(0), binding(0)]] var dest : texture_storage_2d<rgba32float, write>;
-        [[group(0), binding(1)]] var<storage, read> src : FloatArray;
+        @group(0) @binding(0) var dest : texture_storage_2d<rgba32float, write>;
+        @group(0) @binding(1) var<storage, read> src : FloatArray;
 
-        [[block]] struct Params {
+        struct Params {
             width : u32;
             height : u32;
         };
-        [[group(0), binding(2)]] var<uniform> params : Params;
+        @group(0) @binding(2) var<uniform> params : Params;
 
-        [[stage(compute), workgroup_size(8, 8, 1)]]
-        fn main([[builtin(global_invocation_id)]] global_id : vec3<u32>) {
+        @stage(compute) @workgroup_size(8, 8, 1)
+        fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
             }
@@ -98,21 +98,21 @@ export class ComputeHelper {
     `;
 
     private static _copyTextureBufferComputeShader = `
-        [[block]] struct FloatArray {
+        struct FloatArray {
             elements : array<f32>;
         };
 
-        [[group(0), binding(0)]] var src : texture_2d<f32>;
-        [[group(0), binding(1)]] var<storage, write> dest : FloatArray;
+        @group(0) @binding(0) var src : texture_2d<f32>;
+        @group(0) @binding(1) var<storage, write> dest : FloatArray;
 
-        [[block]] struct Params {
+        struct Params {
             width : u32;
             height : u32;
         };
-        [[group(0), binding(2)]] var<uniform> params : Params;
+        @group(0) @binding(2) var<uniform> params : Params;
 
-        [[stage(compute), workgroup_size(8, 8, 1)]]
-        fn main([[builtin(global_invocation_id)]] global_id : vec3<u32>) {
+        @stage(compute), workgroup_size(8, 8, 1)
+        fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
             }
@@ -126,7 +126,7 @@ export class ComputeHelper {
     `;
 
     static GetThreadGroupSizes(source: string, entryPoint: string): BABYLON.Vector3 {
-        const rx = new RegExp(`workgroup_size\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)]]\\s*fn\\s+${entryPoint}\\s*\\(`, "g");
+        const rx = new RegExp(`workgroup_size\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)\\s*fn\\s+${entryPoint}\\s*\\(`, "g");
         const res = rx.exec(source);
         return res ? new BABYLON.Vector3(parseInt(res[1]), parseInt(res[2]), parseInt(res[3])) : new BABYLON.Vector3(1, 1, 1);
     }

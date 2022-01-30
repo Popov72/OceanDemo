@@ -4,11 +4,11 @@
     "description": "Port of the Unity Ocean demo https://github.com/gasgiant/FFT-Ocean in Babylon.js WebGPU",
     "main": "index.ts",
     "dependencies": {
-        "@babylonjs/core": "^5.0.0-alpha.64",
-        "@babylonjs/gui": "^5.0.0-alpha.64",
-        "@babylonjs/inspector": "^5.0.0-alpha.64",
-        "@babylonjs/loaders": "^5.0.0-alpha.64",
-        "@babylonjs/materials": "^5.0.0-alpha.64"
+        "@babylonjs/core": "^5.0.0-beta.5",
+        "@babylonjs/gui": "^5.0.0-beta.5",
+        "@babylonjs/inspector": "^5.0.0-beta.5",
+        "@babylonjs/loaders": "^5.0.0-beta.5",
+        "@babylonjs/materials": "^5.0.0-beta.5"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^2.30.0",

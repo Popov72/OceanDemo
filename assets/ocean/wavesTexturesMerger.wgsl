@@ -1,22 +1,22 @@
-[[block]] struct Params {
+struct Params {
     Lambda : f32;
     DeltaTime : f32;
 };
 
-[[group(0), binding(0)]] var<uniform> params : Params;
+@group(0) @binding(0) var<uniform> params : Params;
 
-[[group(0), binding(1)]] var Displacement : texture_storage_2d<rgba16float, write>;
-[[group(0), binding(2)]] var Derivatives : texture_storage_2d<rgba16float, write>;
-[[group(0), binding(3)]] var TurbulenceRead : texture_2d<f32>;
-[[group(0), binding(4)]] var TurbulenceWrite : texture_storage_2d<rgba16float, write>;
+@group(0) @binding(1) var Displacement : texture_storage_2d<rgba16float, write>;
+@group(0) @binding(2) var Derivatives : texture_storage_2d<rgba16float, write>;
+@group(0) @binding(3) var TurbulenceRead : texture_2d<f32>;
+@group(0) @binding(4) var TurbulenceWrite : texture_storage_2d<rgba16float, write>;
 
-[[group(0), binding(5)]] var Dx_Dz : texture_2d<f32>;
-[[group(0), binding(6)]] var Dy_Dxz : texture_2d<f32>;
-[[group(0), binding(7)]] var Dyx_Dyz : texture_2d<f32>;
-[[group(0), binding(8)]] var Dxx_Dzz : texture_2d<f32>;
+@group(0) @binding(5) var Dx_Dz : texture_2d<f32>;
+@group(0) @binding(6) var Dy_Dxz : texture_2d<f32>;
+@group(0) @binding(7) var Dyx_Dyz : texture_2d<f32>;
+@group(0) @binding(8) var Dxx_Dzz : texture_2d<f32>;
 
-[[stage(compute), workgroup_size(8,8,1)]]
-fn fillResultTextures([[builtin(global_invocation_id)]] id : vec3<u32>)
+@stage(compute) @workgroup_size(8,8,1)
+fn fillResultTextures(@builtin(global_invocation_id) id : vec3<u32>)
 {
     let iid = vec3<i32>(id);
 
