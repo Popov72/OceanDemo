@@ -4,23 +4,23 @@
  */
 import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
+import "@babylonjs/loaders";
+import { PBRCustomMaterial } from "@babylonjs/materials";
+import noiseEXR from "../assets/ocean/00_noise0.exr";
+import babylon_buoy from "../assets/ocean/babylonBuoy.glb";
+import buoy from "../assets/ocean/buoy.glb";
+import fisher_boat from "../assets/ocean/fisher_boat.glb";
 import { CreateSceneClass } from "../createScene";
-import { RTTDebug } from "./tools/RTTDebug";
-import { WavesGenerator } from "./wavesGenerator";
-import { SkyBox } from "./skyBox";
-import { OceanMaterial } from "./oceanMaterial";
 import { Buoyancy } from "./buoyancy";
 import { OceanGeometry } from "./oceanGeometry";
 import { OceanGUI } from "./oceanGui";
+import { OceanMaterial } from "./oceanMaterial";
+import { SkyBox } from "./skyBox";
+import { RTTDebug } from "./tools/RTTDebug";
+import { WavesGenerator } from "./wavesGenerator";
 import { WavesSettings } from "./wavesSettings";
-import { PBRCustomMaterial } from "@babylonjs/materials";
 
-import "@babylonjs/loaders";
 
-import noiseEXR from "../../assets/ocean/00_noise0.exr";
-import buoy from "../../assets/ocean/buoy.glb";
-import fisher_boat from "../../assets/ocean/fisher_boat.glb";
-import babylon_buoy from "../../assets/ocean/babylonBuoy.glb";
 
 const showBuoy = false;
 const showFisherBoat = false;
@@ -104,7 +104,7 @@ export class Ocean implements CreateSceneClass {
 
         this._setCameraKeys();
 
-        await OceanGUI.LoadDAT();
+        //await OceanGUI.LoadDAT(); 
 
         this._rttDebug = new RTTDebug(scene, engine, 32);
         this._rttDebug.show(false);

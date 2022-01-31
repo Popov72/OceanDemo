@@ -1,10 +1,10 @@
 import * as BABYLON from "@babylonjs/core";
-import { RTTDebug } from "./tools/RTTDebug";
+import initialSpectrumCS from "../assets/ocean/initialSpectrum.wgsl";
+import initialSpectrum2CS from "../assets/ocean/initialSpectrum2.wgsl";
 import { ComputeHelper } from "./tools/computeHelper";
+import { RTTDebug } from "./tools/RTTDebug";
 import { WavesSettings } from "./wavesSettings";
 
-import initialSpectrumCS from "../../assets/ocean/initialSpectrum.wgsl";
-import initialSpectrum2CS from "../../assets/ocean/initialSpectrum2.wgsl";
 
 export class InitialSpectrum {
 

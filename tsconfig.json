@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-        "module": "esNext",
-		"target": "es5",
+        "module": "esnext",
+		"target": "es2019",
 		"moduleResolution": "node",
 		"strict": true,
 		"noImplicitAny": true,
@@ -12,6 +12,7 @@
         "skipLibCheck": true,
 		"preserveConstEnums":true,
         "sourceMap": true,
-        "rootDir": "src"
+        "rootDir": "src",
+        "baseUrl": "src"
 	}
 }

@@ -1,11 +1,11 @@
 import * as BABYLON from "@babylonjs/core";
-import { RTTDebug } from "./tools/RTTDebug";
+import fftInverseFFTCS from "../assets/ocean/fftInverseFFT.wgsl";
+import fftInverseFFT2CS from "../assets/ocean/fftInverseFFT2.wgsl";
+import fftInverseFFT3CS from "../assets/ocean/fftInverseFFT3.wgsl";
+import fftPrecomputeCS from "../assets/ocean/fftPrecompute.wgsl";
 import { ComputeHelper } from "./tools/computeHelper";
+import { RTTDebug } from "./tools/RTTDebug";
 
-import fftPrecomputeCS from "../../assets/ocean/fftPrecompute.wgsl";
-import fftInverseFFTCS from "../../assets/ocean/fftInverseFFT.wgsl";
-import fftInverseFFT2CS from "../../assets/ocean/fftInverseFFT2.wgsl";
-import fftInverseFFT3CS from "../../assets/ocean/fftInverseFFT3.wgsl";
 
 export class FFT {
     private _engine: BABYLON.Engine;
