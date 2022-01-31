@@ -1,17 +1,16 @@
 var path = require("path");
 var os = require("os");
 var HtmlWebpackPlugin = require("html-webpack-plugin");
+var { TsconfigPathsPlugin } = require("tsconfig-paths-webpack-plugin");
 
-var __DEV__ = process.argv.includes("serve")
+var __DEV__ = process.argv.includes("serve");
 
 //clean previous build output
-require("rimraf").sync(path.join(__dirname, "dist"))
+require("rimraf").sync(path.join(__dirname, "dist"));
 
 module.exports = {
     mode: "development",
-    devtool: __DEV__
-        ? "inline-source-map"
-        : "source-map",
+    devtool: __DEV__ ? "inline-source-map" : "source-map",
     entry: {
         ocean: path.join(__dirname, "src/index.ts"),
     },
@@ -26,6 +25,9 @@ module.exports = {
             fs: false,
             path: false,
         },
+        plugins: [
+            new TsconfigPathsPlugin()
+        ]
     },
     module: {
         rules: [
