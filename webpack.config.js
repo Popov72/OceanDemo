@@ -1,5 +1,6 @@
 var path = require("path");
 var os = require("os");
+var fs = require("fs");
 var HtmlWebpackPlugin = require("html-webpack-plugin");
 var { TsconfigPathsPlugin } = require("tsconfig-paths-webpack-plugin");
 
@@ -25,9 +26,7 @@ module.exports = {
             fs: false,
             path: false,
         },
-        plugins: [
-            new TsconfigPathsPlugin()
-        ]
+        plugins: [new TsconfigPathsPlugin()],
     },
     module: {
         rules: [
@@ -87,16 +86,29 @@ module.exports = {
     },
 };
 
-//pls someone add paths for linux and mac, notes below.
+
+
+
+function getWindowsBrowserCmd() {
+    let windowsCanaryPath = path.normalize(
+        path.join(
+            os.homedir(),
+            "AppData/Local/Google/Chrome SxS/Application/chrome.exe"
+        )
+    );
+    let isCanaryInstalled = fs.existsSync(windowsCanaryPath);
+    
+    let windowsBrowserCmd = isCanaryInstalled
+        ? windowsCanaryPath
+        : require("open").apps.chrome;
+
+    return windowsBrowserCmd;
+}
+
 function getCanaryPath() {
     switch (os.platform) {
         case "win32":
-            return path.normalize(
-                path.join(
-                    os.homedir(),
-                    "AppData/Local/Google/Chrome SxS/Application/chrome.exe"
-                )
-            );
+            return getWindowsBrowserCmd();
         case "darwin":
             return require("open").apps.chrome;
         case "linux":
