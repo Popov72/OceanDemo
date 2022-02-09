@@ -1,9 +1,9 @@
 import * as BABYLON from "@babylonjs/core";
 import { SkyMaterial } from "@babylonjs/materials";
-
+import qwantani_1k from "../assets/environment/qwantani_1k.hdr";
 import "./tools/skyMaterialExt";
 
-import qwantani_1k from "../../assets/environment/qwantani_1k.hdr";
+
 
 export class SkyBox {
 

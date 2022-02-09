@@ -1,10 +1,13 @@
 import * as BABYLON from "@babylonjs/core";
-import { Tools } from "@babylonjs/core/Misc/tools";
+//import { Tools } from "@babylonjs/core/Misc/tools";
+import GUI from 'lil-gui'; 
 
-declare var dat: any;
+async function LoadDAT(): Promise<void> {
+    var _ = await import("@babylonjs/core/Misc/tools")
+    return _.Tools.LoadScriptAsync("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js");
+}
 
 export class OceanGUI {
-
     private _gui: any;
     private _visible: boolean;
     private _scene: BABYLON.Scene;
@@ -12,9 +15,6 @@ export class OceanGUI {
     private _paramChanged: (name: string, value: any) => void;
     private _onKeyObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.KeyboardInfo>>;
 
-    public static LoadDAT(): Promise<void> {
-        return Tools.LoadScriptAsync("https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js");
-    }
 
     public set visible(v: boolean) {
         if (v === this._visible) {
@@ -36,7 +36,7 @@ export class OceanGUI {
             oldgui.remove();
         }
     
-        this._gui = new dat.GUI();
+        this._gui = new GUI();
         this._gui.domElement.style.marginTop = "60px";
         this._gui.domElement.id = "datGUI";
 

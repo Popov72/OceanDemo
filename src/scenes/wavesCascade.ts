@@ -1,12 +1,12 @@
 import * as BABYLON from "@babylonjs/core";
-import { InitialSpectrum } from "./initialSpectrum";
-import { RTTDebug } from "./tools/RTTDebug";
-import { ComputeHelper } from "./tools/computeHelper";
-import { WavesSettings } from "./wavesSettings";
+import timeDependentSpectrumCS from "../assets/ocean/timeDependentSpectrum.wgsl";
+import wavesTexturesMergerCS from "../assets/ocean/wavesTexturesMerger.wgsl";
 import { FFT } from "./fft";
+import { InitialSpectrum } from "./initialSpectrum";
+import { ComputeHelper } from "./tools/computeHelper";
+import { RTTDebug } from "./tools/RTTDebug";
+import { WavesSettings } from "./wavesSettings";
 
-import timeDependentSpectrumCS from "../../assets/ocean/timeDependentSpectrum.wgsl";
-import wavesTexturesMergerCS from "../../assets/ocean/wavesTexturesMerger.wgsl";
 
 export class WavesCascade {
 

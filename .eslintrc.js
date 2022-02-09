@@ -1,12 +1,11 @@
 module.exports = {
     root: true,
-    parser: '@typescript-eslint/parser',
-    plugins: [
-      '@typescript-eslint',
-    ],
+    ignorePatterns: ["node_modules", "dist", "webpack.*"],
+    parser: "@typescript-eslint/parser",
+    plugins: ["@typescript-eslint"],
     extends: [
-      'eslint:recommended',
-      'plugin:@typescript-eslint/eslint-recommended',
-      'plugin:@typescript-eslint/recommended',
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
     ],
-  };
+};
