@@ -10,10 +10,10 @@ Use F8 to show/hide the GUI (after you click anywhere in the rendering area to g
 
 **Note that your browser needs to support WebGPU!**
 
-![Ocean 1](assets/ocean/ocean0.jpg)
-![Ocean 2](assets/ocean/ocean1.jpg)
-![Ocean 3](assets/ocean/ocean2.jpg)
-![Ocean GUI](assets/ocean/ocean3.jpg)
+![Ocean 1](src/assets/ocean/ocean0.jpg)
+![Ocean 2](src/assets/ocean/ocean1.jpg)
+![Ocean 3](src/assets/ocean/ocean2.jpg)
+![Ocean GUI](src/assets/ocean/ocean3.jpg)
 
 # Running locally
 
