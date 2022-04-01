@@ -116,7 +116,7 @@ export class OceanGeometry {
         const k = this._gridSize;
         const activeLevels = this._activeLodLevels;
 
-        let previousSnappedPosition = BABYLON.TmpVectors.Vector3[0];
+        const previousSnappedPosition = BABYLON.TmpVectors.Vector3[0];
         const centerOffset = BABYLON.TmpVectors.Vector3[1];
         const snappedPosition = BABYLON.TmpVectors.Vector3[2];
         const trimPosition = BABYLON.TmpVectors.Vector3[3];

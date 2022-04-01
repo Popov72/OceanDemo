@@ -28,7 +28,7 @@ export class Buoyancy {
 
     public enabled = true;
 
-    constructor(size: number, numSteps: number = 5, attenuation: number = 1) {
+    constructor(size: number, numSteps = 5, attenuation = 1) {
         this._size = size;
         this._displacementMap = null;
         this._lengthScale = 0;

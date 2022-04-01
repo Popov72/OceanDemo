@@ -320,7 +320,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @returns the new Vector3Float32
      */
      public static Lerp(start: BABYLON.DeepImmutable<Vector3Float32>, end: BABYLON.DeepImmutable<Vector3Float32>, amount: number): Vector3Float32 {
-        var result = new Vector3Float32(0, 0, 0);
+        const result = new Vector3Float32(0, 0, 0);
         Vector3Float32.LerpToRef(start, end, amount, result);
         return result;
     }

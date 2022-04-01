@@ -1,12 +1,12 @@
 @group(0) @binding(0) var H0 : texture_storage_2d<rgba32float, write>;
 
 struct Params {
-    Size : u32;
-    LengthScale : f32;
-    CutoffHigh : f32;
-    CutoffLow : f32;
-    GravityAcceleration : f32;
-    Depth : f32;
+    Size : u32,
+    LengthScale : f32,
+    CutoffHigh : f32,
+    CutoffLow : f32,
+    GravityAcceleration : f32,
+    Depth : f32,
 };
 
 @group(0) @binding(5) var<uniform> params : Params;

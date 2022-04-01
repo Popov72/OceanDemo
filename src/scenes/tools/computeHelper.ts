@@ -17,9 +17,9 @@ export class ComputeHelper {
         @group(0) @binding(0) var tbuf : texture_storage_2d<rgba32float, write>;
 
         struct Params {
-            color : vec4<f32>;
-            width : u32;
-            height : u32;
+            color : vec4<f32>,
+            width : u32,
+            height : u32,
         };
         @group(0) @binding(1) var<uniform> params : Params;
 
@@ -37,8 +37,8 @@ export class ComputeHelper {
         @group(0) @binding(1) var src : texture_2d<f32>;
 
         struct Params {
-            width : u32;
-            height : u32;
+            width : u32,
+            height : u32,
         };
         @group(0) @binding(2) var<uniform> params : Params;
 
@@ -57,8 +57,8 @@ export class ComputeHelper {
         @group(0) @binding(1) var src : texture_2d<f32>;
 
         struct Params {
-            width : u32;
-            height : u32;
+            width : u32,
+            height : u32,
         };
         @group(0) @binding(2) var<uniform> params : Params;
 
@@ -74,15 +74,15 @@ export class ComputeHelper {
 
     private static _copyBufferTextureComputeShader = `
         struct FloatArray {
-            elements : array<f32>;
+            elements : array<f32>,
         };
 
         @group(0) @binding(0) var dest : texture_storage_2d<rgba32float, write>;
         @group(0) @binding(1) var<storage, read> src : FloatArray;
 
         struct Params {
-            width : u32;
-            height : u32;
+            width : u32,
+            height : u32,
         };
         @group(0) @binding(2) var<uniform> params : Params;
 
@@ -99,15 +99,15 @@ export class ComputeHelper {
 
     private static _copyTextureBufferComputeShader = `
         struct FloatArray {
-            elements : array<f32>;
+            elements : array<f32>,
         };
 
         @group(0) @binding(0) var src : texture_2d<f32>;
         @group(0) @binding(1) var<storage, write> dest : FloatArray;
 
         struct Params {
-            width : u32;
-            height : u32;
+            width : u32,
+            height : u32,
         };
         @group(0) @binding(2) var<uniform> params : Params;
 

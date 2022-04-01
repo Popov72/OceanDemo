@@ -1,7 +1,7 @@
 import re
 
 sourceDir = 'src/scenes/'
-wgslDir = 'assets/ocean/'
+wgslDir = 'src/assets/ocean/'
 
 globalReplaces = [
     {
@@ -67,6 +67,18 @@ globalReplaces = [
     {
         "find": r"\bbabylon_buoy\b",
         "replace": "'https://assets.babylonjs.com/meshes/babylonBuoy.glb'"
+    },
+    {
+        "find": r"class OceanGUI \{",
+        "replace": "declare var dat: any;\r\nclass OceanGUI {"
+    },
+    {
+        "find": r"this\._gui = new GUI\(\);",
+        "replace": "this._gui = new dat.GUI();"
+    },
+    {
+        "find": r"//await OceanGUI\.LoadDAT\(\);",
+        "replace": "await OceanGUI.LoadDAT();"
     },
 ]
 

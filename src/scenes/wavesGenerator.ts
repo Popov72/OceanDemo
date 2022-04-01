@@ -54,7 +54,7 @@ export class WavesGenerator {
     public initializeCascades(): void {
         let boundary1 = 0.0001;
         for (let i = 0; i < this.lengthScale.length; ++i) {
-            let boundary2 = i < this.lengthScale.length - 1 ?  2 * Math.PI / this.lengthScale[i + 1] * 6 : 9999;
+            const boundary2 = i < this.lengthScale.length - 1 ?  2 * Math.PI / this.lengthScale[i + 1] * 6 : 9999;
             this._cascades[i].calculateInitials(this._wavesSettings, this.lengthScale[i], boundary1, boundary2);
             boundary1 = boundary2;
         }

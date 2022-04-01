@@ -22,7 +22,7 @@ const K = new Vector3Float32(f32(0.686), f32(0.678), f32(0.666));
 const rayleighZenithLength = f32(8.4E3);
 const mieZenithLength = f32(1.25E3);
 const unitVec = new Vector3Float32(f32(1), f32(1), f32(1));
-const twoVec = new Vector3Float32(f32(2), f32(2), f32(2));
+//const twoVec = new Vector3Float32(f32(2), f32(2), f32(2));
 const oneAndHalfVec = new Vector3Float32(f32(1.5), f32(1.5), f32(1.5));
 const halfOneVec = new Vector3Float32(f32(0.5), f32(0.5), f32(0.5));
 const tenthVec = new Vector3Float32(f32(0.1), f32(0.1), f32(0.1));
@@ -30,7 +30,7 @@ const texColorCst = new Vector3Float32(f32(f32(0.0) * f32(0.3)), f32(f32(0.001) 
 
 (SkyMaterial.prototype as any).getSunColor = function() {
     const sunIntensity = (zenithAngleCos: number) => {
-	    return f32(EE * Math.max(0.0, f32(1.0 - f32(Math.exp((-f32(cutoffAngle - f32(Math.acos(zenithAngleCos)))/f32(steepness)))))));
+        return f32(EE * Math.max(0.0, f32(1.0 - f32(Math.exp((-f32(cutoffAngle - f32(Math.acos(zenithAngleCos)))/f32(steepness)))))));
     };
 
     const simplifiedRayleigh = () => {
@@ -139,7 +139,7 @@ const texColorCst = new Vector3Float32(f32(f32(0.0) * f32(0.3)), f32(f32(0.001) 
     const L0 = tenthVec.multiply(Fex);
 
 	//L0 += (sunE * 19000.0 * Fex) * sundisk;
-	const sundisk = 1.;
+	//const sundisk = 1.;
 	L0.addInPlace(Fex.scale(f32(sunE * 19000.0)));
 
 	//vec3 whiteScale = 1.0/Uncharted2Tonemap(vec3(W));

@@ -5,29 +5,29 @@ let PI : f32 = 3.1415926;
 @group(0) @binding(4) var Noise : texture_2d<f32>;
 
 struct Params {
-    Size : u32;
-    LengthScale : f32;
-    CutoffHigh : f32;
-    CutoffLow : f32;
-    GravityAcceleration : f32;
-    Depth : f32;
+    Size : u32,
+    LengthScale : f32,
+    CutoffHigh : f32,
+    CutoffLow : f32,
+    GravityAcceleration : f32,
+    Depth : f32,
 };
 
 @group(0) @binding(5) var<uniform> params : Params;
 
 struct SpectrumParameter {
-	scale : f32;
-	angle : f32;
-	spreadBlend : f32;
-	swell : f32;
-	alpha : f32;
-	peakOmega : f32;
-	gamma : f32;
-	shortWavesFade : f32;
+	scale : f32,
+	angle : f32,
+	spreadBlend : f32,
+	swell : f32,
+	alpha : f32,
+	peakOmega : f32,
+	gamma : f32,
+	shortWavesFade : f32,
 };
 
 struct SpectrumParameters {
-    elements : array<SpectrumParameter>;
+    elements : array<SpectrumParameter>,
 };
 
 @group(0) @binding(6) var<storage, read> spectrums : SpectrumParameters;

@@ -3,8 +3,8 @@ let PI: f32 = 3.1415926;
 @group(0) @binding(0) var PrecomputeBuffer : texture_storage_2d<rgba32float, write>;
 
 struct Params {
-    Step : i32;
-    Size : i32;
+    Step : i32,
+    Size : i32,
 };
 
 @group(0) @binding(1) var<uniform> params : Params;

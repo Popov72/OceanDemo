@@ -2,7 +2,7 @@
 @group(0) @binding(3) var WavesData : texture_2d<f32>;
 
 struct Params {
-    Time : f32;
+    Time : f32,
 };
 
 @group(0) @binding(4) var<uniform> params : Params;

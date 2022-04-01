@@ -185,7 +185,7 @@ export class Ocean implements CreateSceneClass {
 
                     const dot = BABYLON.Vector3.Dot(sunPos, sunProj);
                     
-                    let intensity = BABYLON.Scalar.Lerp(minIntensity, maxIntensity, BABYLON.Scalar.Clamp(dot, 0, 1));
+                    const intensity = BABYLON.Scalar.Lerp(minIntensity, maxIntensity, BABYLON.Scalar.Clamp(dot, 0, 1));
 
                     this._glowLayer.intensity = sunPos.y < 0 ? maxIntensity : intensity;
                     this._forceUpdateGlowIntensity = false;
@@ -229,7 +229,7 @@ export class Ocean implements CreateSceneClass {
 
         const textNOk = "**Use WebGPU to watch this demo which requires compute shaders support. To enable WebGPU please use Chrome Canary or Edge canary. Also select the WebGPU engine from the top right drop down menu.**";
     
-        var info = new GUI.TextBlock();
+        const info = new GUI.TextBlock();
         info.text = textNOk;
         info.width = "100%";
         info.paddingLeft = "5px";
@@ -447,12 +447,13 @@ export class Ocean implements CreateSceneClass {
     private _parameterChanged(name: string, value: any): void {
         //console.log(name, "=", value);
         switch (name) {
-            case "size":
+            case "size": {
                 const newSize = value | 0;
                 if (newSize !== this._size) {
                     this._updateSize(newSize);
                 }
                 break;
+            }
             case "showDebugRTT":
                 this._rttDebug.show(!!value);
                 break;
@@ -469,7 +470,7 @@ export class Ocean implements CreateSceneClass {
                 }
                 break;
             case "enableFXAA":
-                if (!!value) {
+                if (value) {
                     if (!this._fxaa) {
                         this._fxaa = new BABYLON.FxaaPostProcess("fxaa", 1, this._camera);
                         this._fxaa.samples = this._engine.getCaps().maxMSAASamples;
