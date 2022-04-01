@@ -4,7 +4,7 @@ This is a port to [Babylon.js](https://www.babylonjs.com/) of the great project 
 
 Link to the demo: https://popov72.github.io/OceanDemo/dist/index.html
 
-You can also browse this demo in the Babylon.js Playground: https://playground.babylonjs.com/#YX6IB8#39
+You can also browse this demo in the Babylon.js Playground: https://playground.babylonjs.com/#YX6IB8#55
 
 Use F8 to show/hide the GUI (after you click anywhere in the rendering area to give focus to the canvas) and WASD to move.
 
