@@ -15,7 +15,7 @@ fn complexMult(a: vec2<f32>, b: vec2<f32>) -> vec2<f32>
 	return vec2<f32>(a.r * b.r - a.g * b.g, a.r * b.g + a.g * b.r);
 }
 
-@stage(compute) @workgroup_size(8,8,1)
+@compute @workgroup_size(8,8,1)
 fn horizontalStepInverseFFT(@builtin(global_invocation_id) id : vec3<u32>)
 {
     let iid = vec3<i32>(id);

@@ -23,7 +23,7 @@ export class ComputeHelper {
         };
         @group(0) @binding(1) var<uniform> params : Params;
 
-        @stage(compute) @workgroup_size(8, 8, 1)
+        @compute @workgroup_size(8, 8, 1)
         fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
@@ -42,7 +42,7 @@ export class ComputeHelper {
         };
         @group(0) @binding(2) var<uniform> params : Params;
 
-        @stage(compute) @workgroup_size(8, 8, 1)
+        @compute @workgroup_size(8, 8, 1)
         fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
@@ -62,7 +62,7 @@ export class ComputeHelper {
         };
         @group(0) @binding(2) var<uniform> params : Params;
 
-        @stage(compute) @workgroup_size(8, 8, 1)
+        @compute @workgroup_size(8, 8, 1)
         fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
@@ -86,7 +86,7 @@ export class ComputeHelper {
         };
         @group(0) @binding(2) var<uniform> params : Params;
 
-        @stage(compute) @workgroup_size(8, 8, 1)
+        @compute @workgroup_size(8, 8, 1)
         fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;
@@ -111,7 +111,7 @@ export class ComputeHelper {
         };
         @group(0) @binding(2) var<uniform> params : Params;
 
-        @stage(compute), workgroup_size(8, 8, 1)
+        @compute, workgroup_size(8, 8, 1)
         fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             if (global_id.x >= params.width || global_id.y >= params.height) {
                 return;

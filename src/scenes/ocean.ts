@@ -143,7 +143,7 @@ export class Ocean implements CreateSceneClass {
         this._oceanGeometry = new OceanGeometry(this._oceanMaterial, this._camera, this._scene);
 
         this._fxaa = new BABYLON.FxaaPostProcess("fxaa", 1, this._camera);
-        this._fxaa.samples = engine.getCaps().maxMSAASamples;
+        //this._fxaa.samples = engine.getCaps().maxMSAASamples;
 
         await this._loadMeshes();
 

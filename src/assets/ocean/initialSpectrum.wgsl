@@ -1,4 +1,4 @@
-let PI : f32 = 3.1415926;
+const PI : f32 = 3.1415926;
 
 @group(0) @binding(1) var WavesData : texture_storage_2d<rgba32float, write>;
 @group(0) @binding(2) var H0K : texture_storage_2d<rg32float, write>;
@@ -110,7 +110,7 @@ fn shortWavesFade(kLength: f32, pars: SpectrumParameter) -> f32
 	return exp(-pars.shortWavesFade * pars.shortWavesFade * kLength * kLength);
 }
 
-@stage(compute) @workgroup_size(8,8,1)
+@compute @workgroup_size(8,8,1)
 fn calculateInitialSpectrum(@builtin(global_invocation_id) id : vec3<u32>)
 {
 	let deltaK = 2.0 * PI / params.LengthScale;

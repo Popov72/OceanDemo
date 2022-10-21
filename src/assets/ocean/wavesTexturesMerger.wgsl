@@ -15,7 +15,7 @@ struct Params {
 @group(0) @binding(7) var Dyx_Dyz : texture_2d<f32>;
 @group(0) @binding(8) var Dxx_Dzz : texture_2d<f32>;
 
-@stage(compute) @workgroup_size(8,8,1)
+@compute @workgroup_size(8,8,1)
 fn fillResultTextures(@builtin(global_invocation_id) id : vec3<u32>)
 {
     let iid = vec3<i32>(id);
