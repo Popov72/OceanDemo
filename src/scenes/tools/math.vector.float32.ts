@@ -20,7 +20,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param z defines the z coordinate of the operand
      * @returns the current updated Vector3Float32
      */
-    public addInPlaceFromFloats(x: number, y: number, z: number): Vector3Float32 {
+    public addInPlaceFromFloats(x: number, y: number, z: number): any {
         this.x = fp32(this.x + x);
         this.y = fp32(this.y + y);
         this.z = fp32(this.z + z);
@@ -32,7 +32,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param otherVector defines the second operand
      * @returns the resulting Vector3Float32
      */
-    public add(otherVector: BABYLON.DeepImmutable<Vector3Float32>): Vector3Float32 {
+    public add(otherVector: BABYLON.DeepImmutable<any>): any {
         return this.addToRef(otherVector, new Vector3Float32(this._x, this._y, this._z));
     }
 
@@ -52,7 +52,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param result defines the Vector3Float32 object where to store the result
      * @returns the "result" vector
      */
-    public addToRef(otherVector: BABYLON.DeepImmutable<Vector3Float32>, result: Vector3Float32): Vector3Float32 {
+    public addToRef(otherVector: BABYLON.DeepImmutable<any>, result: any): any {
         return result.copyFromFloats(fp32(this._x + otherVector._x), fp32(this._y + otherVector._y), fp32(this._z + otherVector._z));
     }
 
@@ -61,7 +61,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param otherVector defines the second operand
      * @returns the current updated Vector3Float32
      */
-    public subtractInPlace(otherVector: BABYLON.DeepImmutable<Vector3Float32>): Vector3Float32 {
+    public subtractInPlace(otherVector: BABYLON.DeepImmutable<any>): any {
         this.x = fp32(this.x - otherVector._x);
         this.y = fp32(this.y - otherVector._y);
         this.z = fp32(this.z - otherVector._z);
@@ -73,7 +73,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param otherVector defines the second operand
      * @returns the resulting Vector3Float32
      */
-    public subtract(otherVector: BABYLON.DeepImmutable<Vector3Float32>): Vector3Float32 {
+    public subtract(otherVector: BABYLON.DeepImmutable<any>): any {
         return new Vector3Float32(this._x, this._y, this._z).subtractInPlace(otherVector);
     }
 
@@ -83,7 +83,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param result defines the Vector3Float32 object where to store the result
      * @returns the "result" vector
      */
-    public subtractToRef(otherVector: BABYLON.DeepImmutable<Vector3Float32>, result: Vector3Float32): Vector3Float32 {
+    public subtractToRef(otherVector: BABYLON.DeepImmutable<any>, result: any): any {
         return this.subtractFromFloatsToRef(otherVector._x, otherVector._y, otherVector._z, result);
     }
 
@@ -94,7 +94,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param z defines the z coordinate of the operand
      * @returns the resulting Vector3Float32
      */
-    public subtractFromFloats(x: number, y: number, z: number): Vector3Float32 {
+    public subtractFromFloats(x: number, y: number, z: number): any {
         return this.subtractFromFloatsToRef(x, y, z, new Vector3Float32(this._x, this._y, this._z));
     }
 
@@ -106,7 +106,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param result defines the Vector3Float32 object where to store the result
      * @returns the "result" vector
      */
-    public subtractFromFloatsToRef(x: number, y: number, z: number, result: Vector3Float32): Vector3Float32 {
+    public subtractFromFloatsToRef(x: number, y: number, z: number, result: any): any {
         return result.copyFromFloats(fp32(this._x - x), fp32(this._y - y), fp32(this._z - z));
     }
 
@@ -115,7 +115,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param scale defines the multiplier factor
      * @returns the current updated Vector3Float32
      */
-    public scaleInPlace(scale: number): Vector3Float32 {
+    public scaleInPlace(scale: number): any {
         this.x = fp32(this.x * scale);
         this.y = fp32(this.y * scale);
         this.z = fp32(this.z * scale);
@@ -127,7 +127,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param scale defines the multiplier factor
      * @returns a new Vector3Float32
      */
-    public scale(scale: number): Vector3Float32 {
+    public scale(scale: number): any {
         return new Vector3Float32(this._x, this._y, this._z).scaleInPlace(scale);
     }
 
@@ -137,7 +137,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param result defines the Vector3Float32 object where to store the result
      * @returns the "result" vector
      */
-    public scaleToRef(scale: number, result: Vector3Float32): Vector3Float32 {
+    public scaleToRef(scale: number, result: any): any {
         return result.copyFromFloats(fp32(this._x * scale), fp32(this._y * scale), fp32(this._z * scale));
     }
 
@@ -147,7 +147,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param result defines the Vector3Float32 object where to store the result
      * @returns the "result" vector
      */
-    public scaleAndAddToRef(scale: number, result: Vector3Float32): Vector3Float32 {
+    public scaleAndAddToRef(scale: number, result: any): any {
         return result.addInPlaceFromFloats(fp32(this._x * scale), fp32(this._y * scale), fp32(this._z * scale));
     }
 
@@ -156,7 +156,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param otherVector defines the second operand
      * @returns the current updated Vector3Float32
      */
-    public multiplyInPlace(otherVector: BABYLON.DeepImmutable<Vector3Float32>): Vector3Float32 {
+    public multiplyInPlace(otherVector: BABYLON.DeepImmutable<any>): any {
         this.x = fp32(this.x * otherVector._x);
         this.y = fp32(this.y * otherVector._y);
         this.z = fp32(this.z * otherVector._z);
@@ -168,7 +168,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param otherVector defines the second operand
      * @returns the new Vector3Float32
      */
-    public multiply(otherVector: BABYLON.DeepImmutable<Vector3Float32>): Vector3Float32 {
+    public multiply(otherVector: BABYLON.DeepImmutable<any>): any {
         return this.multiplyByFloats(otherVector._x, otherVector._y, otherVector._z);
     }
 
@@ -178,7 +178,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param result defines the Vector3Float32 object where to store the result
      * @returns the "result" vector
      */
-    public multiplyToRef(otherVector: BABYLON.DeepImmutable<Vector3Float32>, result: Vector3Float32): Vector3Float32 {
+    public multiplyToRef(otherVector: BABYLON.DeepImmutable<any>, result: any): any {
         return result.copyFromFloats(fp32(this._x * otherVector._x), fp32(this._y * otherVector._y), fp32(this._z * otherVector._z));
     }
 
@@ -189,7 +189,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param z defines the z coordinate of the operand
      * @returns the new Vector3Float32
      */
-    public multiplyByFloats(x: number, y: number, z: number): Vector3Float32 {
+    public multiplyByFloats(x: number, y: number, z: number): any {
         const result = new Vector3Float32(x, y, z);
         return this.multiplyToRef(result, result);
     }
@@ -199,7 +199,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param otherVector defines the second operand
      * @returns the new Vector3Float32
      */
-    public divide(otherVector: BABYLON.DeepImmutable<Vector3Float32>): Vector3Float32 {
+    public divide(otherVector: BABYLON.DeepImmutable<any>): any {
         return this.divideToRef(otherVector, new Vector3Float32());
     }
 
@@ -209,7 +209,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param result defines the Vector3Float32 object where to store the result
      * @returns the "result" vector
      */
-    public divideToRef(otherVector: BABYLON.DeepImmutable<Vector3Float32>, result: Vector3Float32): Vector3Float32 {
+    public divideToRef(otherVector: BABYLON.DeepImmutable<any>, result: any): any {
         return result.copyFromFloats(fp32(this._x / otherVector._x), fp32(this._y / otherVector._y), fp32(this._z / otherVector._z));
     }
 
@@ -218,7 +218,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param otherVector defines the second operand
      * @returns the current updated Vector3Float32
      */
-    public divideInPlace(otherVector: Vector3Float32): Vector3Float32 {
+    public divideInPlace(otherVector: any): any {
         return this.divideToRef(otherVector, this);
     }
 
@@ -227,7 +227,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param otherVector defines the second operand
      * @returns the new Vector3Float32
      */
-    public pow(otherVector: BABYLON.DeepImmutable<Vector3Float32>): Vector3Float32 {
+    public pow(otherVector: BABYLON.DeepImmutable<any>): any {
         const result = new Vector3Float32();
         result.x = fp32(Math.pow(this._x, otherVector._x));
         result.y = fp32(Math.pow(this._y, otherVector._y));
@@ -256,7 +256,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * Please note that this is an in place operation.
      * @returns the current updated Vector3Float32
      */
-    public normalize(): Vector3Float32 {
+    public normalize(): any {
         return this.normalizeFromLength(this.length());
     }
 
@@ -266,7 +266,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param len the length of the vector
      * @returns the current updated Vector3Float32
      */
-    public normalizeFromLength(len: number): Vector3Float32 {
+    public normalizeFromLength(len: number): any {
         if (len === 0 || len === 1.0) {
             return this;
         }
@@ -278,7 +278,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * Normalize the current Vector3Float32 to a new vector
      * @returns the new Vector3Float32
      */
-    public normalizeToNew(): Vector3Float32 {
+    public normalizeToNew(): any {
         const normalized = new Vector3Float32(0, 0, 0);
         this.normalizeToRef(normalized);
         return normalized;
@@ -289,7 +289,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param reference define the Vector3Float32 to update
      * @returns the updated Vector3Float32
      */
-    public normalizeToRef(reference: Vector3Float32): Vector3Float32 {
+    public normalizeToRef(reference: any): any {
         const len = this.length();
         if (len === 0 || len === 1.0) {
             return reference.copyFromFloats(this._x, this._y, this._z);
@@ -305,7 +305,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param z defines the z coordinate of the operand
      * @returns the current updated Vector3Float32
      */
-     public copyFromFloats(x: number, y: number, z: number): Vector3Float32 {
+     public copyFromFloats(x: number, y: number, z: number): any {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -319,7 +319,7 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param amount max defines amount between both (between 0 and 1)
      * @returns the new Vector3Float32
      */
-     public static Lerp(start: BABYLON.DeepImmutable<Vector3Float32>, end: BABYLON.DeepImmutable<Vector3Float32>, amount: number): Vector3Float32 {
+     public static Lerp(start: BABYLON.DeepImmutable<any>, end: BABYLON.DeepImmutable<any>, amount: number): any {
         const result = new Vector3Float32(0, 0, 0);
         Vector3Float32.LerpToRef(start, end, amount, result);
         return result;
@@ -332,10 +332,11 @@ export class Vector3Float32 extends BABYLON.Vector3 {
      * @param amount max defines amount between both (between 0 and 1)
      * @param result defines the Vector3Float32 where to store the result
      */
-    public static LerpToRef(start: BABYLON.DeepImmutable<Vector3Float32>, end: BABYLON.DeepImmutable<Vector3Float32>, amount: number, result: Vector3Float32): void {
+    public static LerpToRef(start: BABYLON.DeepImmutable<any>, end: BABYLON.DeepImmutable<any>, amount: number, result: any): any {
         result.x = fp32(start._x + fp32(fp32(end._x - start._x) * amount));
         result.y = fp32(start._y + fp32(fp32(end._y - start._y) * amount));
         result.z = fp32(start._z + fp32(fp32(end._z - start._z) * amount));
+        return result;
     }
 
     /**
