@@ -26,11 +26,11 @@
     "license": "MIT",
     "homepage": "https://github.com/Popov72/OceanDemo",
     "dependencies": {
-        "@babylonjs/core": "^5.8.0",
-        "@babylonjs/gui": "^5.8.0",
-        "@babylonjs/inspector": "^5.8.0",
-        "@babylonjs/loaders": "^5.8.0",
-        "@babylonjs/materials": "^5.8.0",
+        "@babylonjs/core": "^5.28.0",
+        "@babylonjs/gui": "^5.28.0",
+        "@babylonjs/inspector": "^5.28.0",
+        "@babylonjs/loaders": "^5.28.0",
+        "@babylonjs/materials": "^5.28.0",
         "lil-gui": "0.16.0"
     },
     "devDependencies": {
